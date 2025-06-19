@@ -9,7 +9,7 @@ export default function Signup() {
         <AuthForm mode="signup" />
         <p className="mt-4 text-center text-sm text-gray-700">
           Already have an account?{' '}
-          <Link to="/" className="text-blue-600 font-medium hover:underline">
+          <Link to="/login" className="text-blue-600 font-medium hover:underline">
             Login here
           </Link>
         </p>
