@@ -1,4 +1,12 @@
+import { useNavigate } from 'react-router-dom';
+
 export default function AdminHome() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/');
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <aside className="w-64 bg-white shadow-lg p-6">
@@ -11,7 +19,11 @@ export default function AdminHome() {
           <li className="text-gray-700 hover:text-blue-600 cursor-pointer">Payouts & Billing</li>
           <li className="text-gray-700 hover:text-blue-600 cursor-pointer">Reports & Analytics</li>
           <li className="text-gray-700 hover:text-blue-600 cursor-pointer">Settings</li>
-          <li className="text-red-600 hover:text-red-800 cursor-pointer">Logout</li>
+          <li>
+            <button onClick={handleLogout} className="text-red-600 hover:text-red-800 cursor-pointer w-full text-left">
+              Logout
+            </button>
+          </li>
         </ul>
       </aside>
       <main className="flex-1 p-8">
