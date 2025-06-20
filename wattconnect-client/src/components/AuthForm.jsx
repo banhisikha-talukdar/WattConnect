@@ -55,7 +55,7 @@ export default function AuthForm({ mode }) {
         localStorage.setItem("token", data.token);
       }
 
-      navigate("/home");
+      navigate("/customer/home");
     } catch (err) {
       console.error("❌ Network or server error:", err);
       alert("Network or server error");
