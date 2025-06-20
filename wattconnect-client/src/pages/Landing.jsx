@@ -59,7 +59,7 @@ const Landing = () => {
                 to="/login"
                 className="inline-flex items-center px-8 py-4 text-lg font-semibold text-blue-700 bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
               >
-                Sign In
+                Sign Up
               </Link> 
             </div>
           </div>

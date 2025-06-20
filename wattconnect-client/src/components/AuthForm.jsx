@@ -13,7 +13,11 @@ export default function AuthForm({ mode }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/home');
+    if (formData.role === 'admin') {
+      navigate('/admin/home');
+    } else {
+      navigate('/customer/home');
+    }
   };
 
   return (
