@@ -18,19 +18,17 @@ export default function Navbar({ type }) {
     navigate('/');
   };
 
-  const links = type === 'admin'
-    ? [
-        { name: 'Home', icon: <Home size={20} />, path: '/admin/home' },
-        { name: 'Applications', icon: <FileText size={20} />, path: '/admin/applications' },
-        { name: 'Engineer Scheduling', icon: <Users size={20} />, path: '/admin/engineer_scheduling' },
-        { name: 'Meter Scheduling', icon: <CalendarClock size={20} />, path: '/admin/meter_scheduling' },
-      ]
-    : [
-        { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/customer/dashboard' },
-        { name: 'New Application', icon: <FileText size={20} />, path: '/customer/new_application' },
-        { name: 'Tips & Insights', icon: <FileBarChart size={20} />, path: '/customer/tips-insights' },
-        { name: 'Profile', icon: <User size={20} />, path: '/customer/profile' },
-      ];
+  const links = type === 'admin' ? [
+    { name: 'Home', icon: <Home size={20} />, path: '/admin/home' },
+    { name: 'Applications', icon: <FileText size={20} />, path: '/admin/applications' },
+    { name: 'Engineer Scheduling', icon: <Users size={20} />, path: '/admin/engineer_scheduling' },
+    { name: 'Meter Scheduling', icon: <CalendarClock size={20} />, path: '/admin/meter_scheduling' },
+  ] : [
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/customer/dashboard' },
+    { name: 'New Application', icon: <FileText size={20} />, path: '/customer/new_application' },
+    { name: 'Tips & Insights', icon: <FileBarChart size={20} />, path: '/customer/tips-insights' },
+    { name: 'Profile', icon: <User size={20} />, path: '/customer/profile' },
+  ];
 
   return (
     <aside className="w-64 bg-white shadow-lg p-6 h-full">
@@ -66,4 +64,3 @@ export default function Navbar({ type }) {
     </aside>
   );
 }
-
