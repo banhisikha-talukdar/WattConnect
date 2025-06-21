@@ -42,8 +42,8 @@ export default function Navbar({ type }) {
               onClick={() => navigate(link.path)}
               className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg transition duration-200 border-2 ${
                 isActive
-                  ? 'border-[3px] border-transparent font-semibold bg-gray-200'
-                  : 'border-transparent text-gray-700 hover:bg-white hover:border-[transparent] hover:[border-image:linear-gradient(to_right,blue,#60a5fa)_1] hover:border-image-slice-[1]'
+                  ? 'border-[3px] border-transparent font-semibold bg-blue-100'
+                  : 'border-transparent text-gray-500 hover:bg-white hover:[border-image:linear-gradient(to_right,blue,#60a5fa)_1] hover:border-image-slice-[1]'
               }`}
             >
               {link.icon}
