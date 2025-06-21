@@ -6,8 +6,8 @@ import LoginHeader from './components/LoginHeader';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import CustomerHome from './pages/CustomerHome';
-import AdminHome from './pages/AdminHome';
+import CustomerDashboard from './pages/Customer/Dashboard'
+import AddEntry from './pages/Customer/AddEntry';
 
 const AppLayout = ({ children, header }) => (
   <div className="min-h-screen flex flex-col bg-gray-50">
@@ -37,8 +37,8 @@ const AppWrapper = () => {
     <AppLayout header={header}>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/customer/home" element={<CustomerHome />} />
-        <Route path="/admin/home" element={<AdminHome />} />
+        <Route path="/customer/dashboard" element={<CustomerDashboard />}/>
+        <Route path="/customer/add" element={<AddEntry />} />
       </Routes>
     </AppLayout>
   );
