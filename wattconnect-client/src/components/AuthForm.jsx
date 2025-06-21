@@ -55,7 +55,11 @@ export default function AuthForm({ mode }) {
         localStorage.setItem("token", data.token);
       }
 
-      navigate("/customer/home");
+      if (data.user?.role === "admin") {
+        navigate("/admin/home");
+      } else {
+        navigate("/customer/dashboard");
+      }
     } catch (err) {
       console.error("❌ Network or server error:", err);
       alert("Network or server error");
