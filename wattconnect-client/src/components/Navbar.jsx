@@ -4,6 +4,7 @@ import {
   FileText,
   Users,
   User,
+  Wrench,
   LayoutDashboard,
   FileBarChart,
   CalendarClock,
@@ -21,17 +22,19 @@ export default function Navbar({ type }) {
   const links = type === 'admin' ? [
     { name: 'Home', icon: <Home size={20} />, path: '/admin/home' },
     { name: 'Applications', icon: <FileText size={20} />, path: '/admin/applications' },
-    { name: 'Engineer Scheduling', icon: <Users size={20} />, path: '/admin/engineer_scheduling' },
+    { name: 'Engineer Scheduling', icon: <Wrench size={20} />, path: '/admin/engineer_scheduling' },
     { name: 'Meter Scheduling', icon: <CalendarClock size={20} />, path: '/admin/meter_scheduling' },
   ] : [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/customer/dashboard' },
     { name: 'New Application', icon: <FileText size={20} />, path: '/customer/new_application' },
     { name: 'Tips & Insights', icon: <FileBarChart size={20} />, path: '/customer/tips-insights' },
+    { name: 'Schedule my engineer', icon: <Wrench size={20} />, path: '/customer/engineer_scheduling_form' },
+    { name: 'Schedule my meter', icon: <CalendarClock size={20} />, path: '/customer/meter_scheduling_form' },
     { name: 'Profile', icon: <User size={20} />, path: '/customer/profile' },
   ];
 
   return (
-    <aside className="w-64 bg-[#dfeafa] shadow-xl p-6 h-full">
+    <aside className="w-68 bg-[#dfeafa] shadow-xl p-6 h-full">
       <h2 className="text-xl text-blue-700 font-bold mb-4">WattConnect</h2>
       <ul className="space-y-3">
         {links.map((link, index) => {

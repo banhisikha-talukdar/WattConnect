@@ -26,12 +26,12 @@ export default function AddEntry() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 justify-center items-center">
+    <div className="flex h-screen bg-gradient-to-b from-[#9cc7fc] via-white to-[#9cc7fc] justify-center items-center">
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded shadow-md w-full max-w-md space-y-6"
       >
-        <h2 className="text-xl font-semibold text-center">Add New Entry</h2>
+        <h2 className="text-xl text-[#01195e] font-semibold text-center">Add New Entry</h2>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Month</label>
@@ -95,7 +95,7 @@ export default function AddEntry() {
           </button>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-[#01195e] text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             Submit
           </button>

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from 'lucide-react';
+
 
 export default function AuthForm({ mode }) {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -98,13 +101,19 @@ export default function AuthForm({ mode }) {
         className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
       />
-      <input
-        type="password"
-        placeholder="Password"
-        required
-        className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-      />
+      <div className="relative">
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder="Password"
+          required
+          className="border border-gray-300 rounded px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+        />
+        <span className="absolute right-3 top-2/4 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+          onClick={() => setShowPassword((prev) => !prev)}>
+          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        </span>
+      </div>
 
       <select
         className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -114,7 +123,7 @@ export default function AuthForm({ mode }) {
         <option value="admin">Admin</option>
       </select>
 
-      <button type="submit" className="bg-[#226c82] hover:bg-[#f0920f] text-white font-semibold py-2 rounded transition duration-100 py-2 px-25 mx-auto block">
+      <button type="submit" className="bg-[#01195e] hover:bg-[#f0920f] text-white font-semibold py-2 rounded transition duration-100 py-2 px-25 mx-auto block">
         {mode === "login" ? "Login" : "Sign Up"}
       </button>
     </form>

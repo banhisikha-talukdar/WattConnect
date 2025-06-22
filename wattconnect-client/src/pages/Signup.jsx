@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 
 export default function Signup() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-[#8ce5f0]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-[#9cc7fc]">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-[#226c82] mb-6">Sign Up</h1>
+        <h1 className="text-3xl font-bold text-center text-[#01195e] mb-6">Sign Up</h1>
         <AuthForm mode="signup" />
         <p className="mt-4 text-center text-sm text-gray-700">
           Already have an account?{' '}

@@ -40,7 +40,7 @@ const Landing = () => {
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-blue-300 mb-4">
               Watt Connect
-              <span className="block text-[#7fa9eb] text-shadow-lg/30">Smart Energy Management Made Simple</span>
+              <span className="block text-[#c9d7fe] text-shadow-lg/30">Smart Energy Management Made Simple</span>
             </h1>
 
             <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed">
@@ -93,13 +93,13 @@ const Landing = () => {
       </section>
 
       {/*             Last Section          */}
-      <section className="py-20 bg-gradient-to-b from-white to-[#60dbea]">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#031517] mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
               Ready to Start Saving Energy?
             </h2>
-            <p className="text-xl text-gray-500 mb-8 leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               Join thousands of customers who are already saving money and reducing their environmental impact with our smart energy management platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -107,7 +107,7 @@ const Landing = () => {
                 <Users className="mr-2 w-5 h-5" />
                 Create Free Account
               </Link>
-              <Link to="/login" className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-br from-blue-400 to-[#031517] hover:bg-blue-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Link to="/login" className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-br from-blue-400 to-[#01195e] hover:bg-blue-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                 Access Your Dashboard
               </Link> 
             </div>
