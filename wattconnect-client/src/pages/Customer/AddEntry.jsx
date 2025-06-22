@@ -93,10 +93,7 @@ export default function AddEntry() {
           >
             Go Back
           </button>
-          <button
-            type="submit"
-            className="bg-[#01195e] text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
+          <button type="submit" className="bg-[#01195e] text-white px-4 py-2 rounded hover:bg-blue-700">
             Submit
           </button>
         </div>

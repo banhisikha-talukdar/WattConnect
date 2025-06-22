@@ -28,8 +28,8 @@ export default function Navbar({ type }) {
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/customer/dashboard' },
     { name: 'New Application', icon: <FileText size={20} />, path: '/customer/new_application' },
     { name: 'Tips & Insights', icon: <FileBarChart size={20} />, path: '/customer/tips-insights' },
-    { name: 'Schedule my engineer', icon: <Wrench size={20} />, path: '/customer/engineer_scheduling_form' },
-    { name: 'Schedule my meter', icon: <CalendarClock size={20} />, path: '/customer/meter_scheduling_form' },
+    { name: 'Schedule my engineer', icon: <Wrench size={20} />, path: '/customer/my_engineer_scheduling' },
+    { name: 'Schedule my meter', icon: <CalendarClock size={20} />, path: '/customer/my_meter_scheduling' },
     { name: 'Profile', icon: <User size={20} />, path: '/customer/profile' },
   ];
 

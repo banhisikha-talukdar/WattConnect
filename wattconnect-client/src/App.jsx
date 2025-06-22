@@ -11,8 +11,10 @@ import AddEntry from './pages/Customer/AddEntry';
 import CustomerDashboard from './pages/Customer/Dashboard';
 import NewApplication from './pages/Customer/NewApplication';
 import TipsnInsights from './pages/Customer/TipsnInsights';
-import ScheduleMyEngineer from './pages/Customer/EngineerScheduleForm';
-import ScheduleMyMeter from './pages/Customer/MeterScheduleForm';
+import EngineerSchedule from './pages/Customer/EngineerSchedule';
+import MeterSchedule from './pages/Customer/MeterSchedule';
+import ScheduleMyEngineerForm from './pages/Customer/ScheduleMyEngineerForm';
+import ScheduleMyMeterForm from './pages/Customer/ScheduleMyMeterForm';
 import MyProfile from './pages/Customer/MyProfile';
 
 import Home from './pages/Admin/Home';
@@ -53,11 +55,12 @@ const AppWrapper = () => {
 
         <Route path="/customer/new_application" element={<NewApplication />}/>
         <Route path="/customer/tips-insights" element={<TipsnInsights />}/>
-        <Route path="/customer/engineer_scheduling_form" element={<ScheduleMyEngineer />} />
-        <Route path="/customer/meter_scheduling_form" element={<ScheduleMyMeter />} />
+        <Route path="/customer/my_engineer_scheduling" element={<EngineerSchedule />} />
+        <Route path="/customer/my_meter_scheduling" element={<MeterSchedule />} />
+        <Route path="/customer/schedule_my_engineer_form" element={<ScheduleMyEngineerForm />} />
+        <Route path="/customer/schedule_my_meter_form" element={<ScheduleMyMeterForm />} />
         <Route path="/customer/profile" element={<MyProfile />}/>
 
-        
         <Route path="/admin/home" element={<Home />} />
         <Route path="/admin/applications" element={<Applications />} />
         <Route path="/admin/engineer_scheduling" element={<EngineerScheduling />} />
