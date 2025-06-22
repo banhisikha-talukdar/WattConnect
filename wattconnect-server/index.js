@@ -5,7 +5,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/auth');
-//const usageRoutes = require('./routes/usage');
+const usageRoutes = require('./routes/usage');
 //const applicationRoutes = require('./routes/application');
 
 dotenv.config();
@@ -21,7 +21,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error(err));
 
 app.use('/api/auth', authRoutes);
-//app.use('/api/usage', usageRoutes);
+app.use('/api/usage', usageRoutes);
 //app.use('/api/application', applicationRoutes);
 
 const PORT = process.env.PORT || 5000;
