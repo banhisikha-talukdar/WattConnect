@@ -1,3 +1,5 @@
 node_modules/
 .env
 uploads/
+seed/ht_tariff_green_tod_apdcl_2025.json
+seed/lt_tariff_data.json

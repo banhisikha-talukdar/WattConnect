@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const usageRoutes = require('./routes/usage');
 //const applicationRoutes = require('./routes/application');
+const tariffRoutes = require("./routes/tariff");
 
 dotenv.config();
 connectDB();
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/usage', usageRoutes);
 //app.use('/api/application', applicationRoutes);
+app.use("/api/tariffs", tariffRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
