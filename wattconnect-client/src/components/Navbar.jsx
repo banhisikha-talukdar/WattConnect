@@ -31,32 +31,33 @@ export default function Navbar({ type }) {
   ];
 
   return (
-    <aside className="w-64 bg-white shadow-lg p-6 h-full">
+    <aside className="w-64 bg-[#dfeafa] shadow-xl p-6 h-full">
       <h2 className="text-xl text-blue-700 font-bold mb-4">WattConnect</h2>
       <ul className="space-y-3">
         {links.map((link, index) => {
           const isActive = location.pathname === link.path;
           return (
-            <li
-              key={index}
-              onClick={() => navigate(link.path)}
-              className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg transition duration-200 border-2 ${
-                isActive
-                  ? 'border-[3px] border-transparent font-semibold bg-blue-100'
-                  : 'border-transparent text-gray-500 hover:bg-white hover:[border-image:linear-gradient(to_right,blue,#60a5fa)_1] hover:border-image-slice-[1]'
-              }`}
-            >
-              {link.icon}
-              <span>{link.name}</span>
+            <li key={index} onClick={() => navigate(link.path)}>
+              <div className={`relative rounded-lg p-[2px] transition-all duration-200
+                ${isActive
+                  ? 'bg-gradient-to-r from-[#031517] via-[#4eb14f] to-[#031517]'
+                  : 'hover:bg-gradient-to-r hover:from-[#031517] via-gray-200 to-[#031517]'}
+              `}>
+                <div className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg w-full h-full
+                  ${isActive
+                    ? 'bg-[#dfeafa] font-semibold text-[#031517]'
+                    : 'bg-[#dfeafa] text-gray-600 hover:text-blue-500'}
+                `}>
+                  {link.icon}
+                  <span>{link.name}</span>
+                </div>
+              </div>
             </li>
           );
         })}
         <li>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 text-red-600 hover:bg-red-100 hover:rounded-lg cursor-pointer w-full text-left mt-4"
-          >
-            <LogOut size={35} />
+          <button onClick={handleLogout} className="flex items-center gap-3 font-bold bg-[#f20d19] text-white hover:bg-[#b70a13] rounded-lg cursor-pointer w-full text-left mt-4 px-3 py-2 transition-colors duration-100">
+            <LogOut size={30} />
             <span>Logout</span>
           </button>
         </li>

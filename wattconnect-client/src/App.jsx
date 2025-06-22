@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import LandingHeader from './components/LandingHeader';
 import Footer from './components/Footer';
-import LoginHeader from './components/LoginHeader';
+import LoginSignupHeader from './components/LoginSignupHeader';
 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -29,7 +29,7 @@ const AppWrapper = () => {
   const { pathname } = location;
   if (pathname === '/login' || pathname === '/signup') {
     return (
-      <AppLayout header={<LoginHeader />}>
+      <AppLayout header={<LoginSignupHeader />}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

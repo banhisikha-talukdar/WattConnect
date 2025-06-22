@@ -9,10 +9,10 @@ export default function CustomerDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-[#dfeafa]">
       <Navbar type="customer" />
       <main className="flex-1 p-8 relative">
-        <button onClick={handleAddNew} className="absolute top-8 right-8 bg-blue-700 text-white px-4 py-2 rounded-xl hover:bg-blue-300">
+        <button onClick={handleAddNew} className="absolute top-8 right-8 bg-[#226c82] text-white px-4 py-2 rounded-xl hover:bg-[#f0920f]">
           Add New
         </button>
         <h1 className="text-2xl font-bold">Welcome to Customer Dashboard</h1>

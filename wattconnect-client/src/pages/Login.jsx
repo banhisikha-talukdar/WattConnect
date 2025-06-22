@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 
 export default function Login() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-[#8ce5f0]">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">Login</h1>
+        <h1 className="text-3xl font-bold text-center text-[#226c82] mb-6">Login</h1>
         <AuthForm mode="login" />
         <p className="mt-4 text-center text-sm text-gray-700">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-blue-600 font-medium hover:underline">
+          <Link to="/signup" className="text-[#226c82] font-medium hover:underline">
             Sign up here
           </Link>
         </p>
