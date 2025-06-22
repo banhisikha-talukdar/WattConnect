@@ -42,7 +42,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, username: user.username, role: user.role },
       process.env.JWT_SECRET || 'fallbacksecret',
       { expiresIn: '7d' }
     );
@@ -94,12 +94,12 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, username: user.username, role: user.role },
       process.env.JWT_SECRET || 'fallbacksecret',
       { expiresIn: '7d' }
     );
 
-    console.log("✅ Login successful for:", email); // <--- Should appear now
+    console.log("✅ Login successful for:", email); 
 
     res.json({
       message: 'Login successful',
