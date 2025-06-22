@@ -11,6 +11,7 @@ router.post("/", verifyToken, async (req, res) => {
       userId: req.userId,
       username: req.username,
       month,
+      year,
       unitsUsed
     });
 
