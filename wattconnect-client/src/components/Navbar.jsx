@@ -58,13 +58,14 @@ export default function Navbar({ type }) {
             </li>
           );
         })}
-        <li>
-          <button onClick={handleLogout} className="flex items-center gap-3 font-bold bg-[#f20d19] text-white hover:bg-[#b70a13] rounded-lg cursor-pointer w-full text-left mt-4 px-3 py-2 transition-colors duration-100">
-            <LogOut size={30} />
-            <span>Logout</span>
-          </button>
-        </li>
       </ul>
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 font-bold bg-[#f20d19] text-white hover:bg-[#b70a13] rounded-lg cursor-pointer w-full text-left px-3 py-2 transition-colors duration-100"
+      >
+        <LogOut size={26} />
+        <span>Logout</span>
+      </button>
     </aside>
   );
 }
