@@ -34,7 +34,7 @@ export default function Navbar({ type }) {
   ];
 
   return (
-    <aside className="w-68 bg-[#dfeafa] shadow-xl p-6 h-full">
+    <aside className="w-68 bg-[#f4f6fa] shadow-xl p-6 h-full">
       <h2 className="text-xl text-blue-700 font-bold mb-4">WattConnect</h2>
       <ul className="space-y-3">
         {links.map((link, index) => {
@@ -43,13 +43,13 @@ export default function Navbar({ type }) {
             <li key={index} onClick={() => navigate(link.path)}>
               <div className={`relative rounded-lg p-[2px] transition-all duration-200
                 ${isActive
-                  ? 'bg-gradient-to-r from-[#031517] via-[#4eb14f] to-[#031517]'
-                  : 'hover:bg-gradient-to-r hover:from-[#031517] via-gray-200 to-[#031517]'}
+                  ? 'bg-gradient-to-r from-[#01217e] via-blue-300 to-[#01217e]'
+                  : 'hover:bg-gradient-to-r hover:from-[#01217e] via-gray-200 to-[#01217e]'}
               `}>
                 <div className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg w-full h-full
                   ${isActive
-                    ? 'bg-[#dfeafa] font-semibold text-[#031517]'
-                    : 'bg-[#dfeafa] text-gray-600 hover:text-blue-500'}
+                    ? 'bg-[#f4f6fa] font-semibold text-[#01217e]'
+                    : 'bg-[#f4f6fa] text-gray-600 hover:text-blue-500'}
                 `}>
                   {link.icon}
                   <span>{link.name}</span>
@@ -58,14 +58,11 @@ export default function Navbar({ type }) {
             </li>
           );
         })}
+        <button onClick={handleLogout} className="flex items-center gap-3 font-bold bg-[#f20d19] text-white hover:bg-[#b70a13] rounded-lg cursor-pointer w-full text-left px-3 py-2 transition-colors duration-100">
+          <LogOut size={26} />
+          <span>Logout</span>
+        </button>
       </ul>
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-3 font-bold bg-[#f20d19] text-white hover:bg-[#b70a13] rounded-lg cursor-pointer w-full text-left px-3 py-2 transition-colors duration-100"
-      >
-        <LogOut size={26} />
-        <span>Logout</span>
-      </button>
     </aside>
   );
 }

@@ -35,12 +35,12 @@ export default function TipsnInsights() {
   ];
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-white to-[#dceefd]">
+    <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="customer" />
       <main className="flex-1 p-10 overflow-auto">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-extrabold mb-4 text-[#226c82]">Energy Tips & Insights</h1>
-          <p className="text-lg text-gray-700 mb-10">
+          <h1 className="text-4xl font-extrabold mb-4 text-gray-400 text-shadow-md/10">Energy Tips & Insights</h1>
+          <p className="text-lg text-gray-500 mb-10">
             Make smarter energy choices with these practical tips — great for your wallet and the planet.
           </p>
 
@@ -50,7 +50,7 @@ export default function TipsnInsights() {
                 key={index}
                 className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-gray-100"
               >
-                <h2 className="text-2xl font-semibold text-[#226c82] mb-2">{tip.title}</h2>
+                <h2 className="text-2xl font-semibold text-gray-600 mb-2">{tip.title}</h2>
                 <p className="text-gray-700 text-base leading-relaxed">{tip.description}</p>
               </div>
             ))}

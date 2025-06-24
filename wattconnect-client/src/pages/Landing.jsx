@@ -107,7 +107,7 @@ const Landing = () => {
                 <Users className="mr-2 w-5 h-5" />
                 Create Free Account
               </Link>
-              <Link to="/login" className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-br from-blue-400 to-[#01195e] hover:bg-blue-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Link to="/login" className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-br from-blue-400 to-[#01217e] hover:bg-blue-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                 Access Your Dashboard
               </Link> 
             </div>

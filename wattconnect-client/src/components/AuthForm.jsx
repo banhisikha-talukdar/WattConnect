@@ -123,7 +123,7 @@ export default function AuthForm({ mode }) {
         <option value="admin">Admin</option>
       </select>
 
-      <button type="submit" className="bg-[#01195e] hover:bg-[#f0920f] text-white font-semibold py-2 rounded transition duration-100 py-2 px-25 mx-auto block">
+      <button type="submit" className="bg-[#01217e] hover:bg-[#f0920f] text-white font-semibold py-2 rounded transition duration-100 py-2 px-25 mx-auto block">
         {mode === "login" ? "Login" : "Sign Up"}
       </button>
     </form>

@@ -49,18 +49,18 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-white to-[#cde9f6]">
+    <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="customer" />
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="bg-white shadow-lg border border-gray-200 rounded-2xl w-full max-w-md p-8">
 
           {!editing && (
-            <h1 className="text-3xl font-extrabold text-center text-[#226c82] mb-6">
+            <h1 className="text-3xl font-extrabold text-center text-[#01217e] mb-6">
               Welcome, {profile.username}!
             </h1>
           )}
 
-          <h2 className="text-xl font-semibold text-[#226c82] mb-4 text-center">Profile Info</h2>
+          <h2 className="text-xl font-semibold text-blue-500 mb-4 text-center">Profile Info</h2>
 
           {['username', 'email'].map((field) => (
             <div key={field} className="mb-5">
@@ -84,14 +84,14 @@ export default function Profile() {
               <>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 bg-[#226c82] text-white px-5 py-2 rounded-md hover:bg-[#1a5466] transition"
+                  className="flex items-center gap-2 bg-[#01217e] text-white px-5 py-2 rounded-md hover:bg-[#55c428] transition"
                 >
                   <CheckCircle size={18} />
                   Save
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="flex items-center gap-2 bg-gray-200 text-gray-800 px-5 py-2 rounded-md hover:bg-gray-300 transition"
+                  className="flex items-center gap-2 bg-gray-200 text-gray-800 px-5 py-2 rounded-md hover:bg-[#f4410b] transition"
                 >
                   <XCircle size={18} />
                   Cancel
@@ -100,7 +100,7 @@ export default function Profile() {
             ) : (
               <button
                 onClick={() => setEditing(true)}
-                className="flex items-center gap-2 bg-[#226c82] text-white px-5 py-2 rounded-md hover:bg-[#f0920f] transition"
+                className="flex items-center gap-2 bg-[#01217e] text-white px-5 py-2 rounded-md hover:bg-[#f0920f] transition"
               >
                 <PencilLine size={18} />
                 Edit Profile

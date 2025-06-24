@@ -9,13 +9,13 @@ export default function CustomerDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-[#dfeafa]">
+    <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="customer" />
       <main className="flex-1 p-8 relative">
-        <button onClick={handleAddNew} className="absolute top-8 right-8 bg-[#226c82] text-white px-4 py-2 rounded-xl hover:bg-[#f0920f]">
+        <button onClick={handleAddNew} className="absolute top-8 right-8 bg-[#01217e] hover:bg-[#fcbe03] text-white px-4 py-2 rounded-xl ">
           Add New
         </button>
-        <h1 className="text-2xl font-bold">Welcome to Customer Dashboard</h1>
+        <h1 className="text-2xl text-black font-bold">Welcome to Customer Dashboard</h1>
       </main>
     </div>
   );

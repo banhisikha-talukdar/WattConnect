@@ -93,7 +93,7 @@ export default function SubmitUsageForm() {
           </button>
           <button
             type="submit"
-            className="w-1/2 bg-[#226c82] hover:bg-[#f0920f] text-white font-semibold py-2 rounded transition"
+            className="w-1/2 bg-[#01217e] hover:bg-[#f0920f] text-white font-semibold py-2 rounded transition"
           >
             Submit
           </button>

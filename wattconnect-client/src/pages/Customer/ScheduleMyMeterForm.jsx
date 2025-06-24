@@ -99,9 +99,21 @@ export default function ScheduleMyMeterForm() {
           className="w-full p-2 border rounded-lg resize-none"
         />
 
-        <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-          Schedule It
-        </button>
+        <div className="flex gap-4 justify-end">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-[#ec7c6e] transition"
+          >
+            Go Back
+          </button>
+          <button
+            type="submit"
+            className="bg-[#01217e] text-white px-6 py-2 rounded-lg hover:bg-[#fcbe03] transition"
+          >
+            Schedule It
+          </button>
+        </div>
       </form>
     </div>
   );
