@@ -27,43 +27,44 @@ const Landing = () => {
   ];
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-indigo-100">
-      {/*            Main Section         */}
-      <section className="relative px-4 sm:px-6 lg:px-8 py-20 lg:py-32 bg-[url('./assets/hero-img.jpg')] bg-cover bg-center bg-no-repeat">
+      <section className="relative px-4 sm:px-6 lg:px-8 py-20 lg:py-32 bg-[url('./assets/hero-img2.jpeg')] bg-cover bg-center bg-no-repeat">
+        {/* Bottom Gradient Fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#b0daf2] pointer-events-none z-0" />
 
-        <div className="max-w-7xl mx-auto ">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-8">
-              <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-400 to-[#2550da] rounded-3xl shadow-2xl">
-                <Zap className="w-10 h-10 text-white" />
-              </div>
+        {/* Main Content */}
+        <div className="relative z-10 max-w-7xl mx-auto text-center">
+          <div className="flex items-center justify-center mb-8">
+            <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-400 to-[#2550da] rounded-3xl shadow-2xl">
+              <Zap className="w-10 h-10 text-white" />
             </div>
+          </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-blue-300 mb-4">
-              Watt Connect
-              <span className="block text-[#c9d7fe] text-shadow-lg/30">Smart Energy Management Made Simple</span>
-            </h1>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-blue-700 mb-4">
+            Watt Connect
+            <span className="block text-[#c9d7fe] text-shadow-lg/30">Smart Energy Management Made Simple</span>
+          </h1>
 
-            <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed">
-              Welcome to APDCL's Smart Energy Saver platform. Monitor, analyze, and optimize your electricity consumption with our intelligent dashboard.
-            </p>
+          <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed">
+            Welcome to APDCL's Smart Energy Saver platform. Monitor, analyze, and optimize your electricity consumption with our intelligent dashboard.
+          </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                to="/signup"
-                className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-400 to-[#2550da] hover:from-blue-300 hover:to-blue-400 hover:text-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Get Started Today
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link> 
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link
+              to="/signup"
+              className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-400 to-[#2550da] hover:from-blue-300 hover:to-blue-400 hover:text-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              Get Started Today
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
       </section>
+
       {/*             Cards Section            */}
-      <section className="py-20 bg-gradient-to-b from-black via-gray-700 to-white">
+      <section className="py-20 bg-gradient-to-b from-[#b0daf2] to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-400 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Why Choose Watt Connect?
             </h2>
             <p className="text-xl text-[#7fa9eb] max-w-3xl mx-auto">

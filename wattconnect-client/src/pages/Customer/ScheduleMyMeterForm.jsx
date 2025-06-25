@@ -22,8 +22,9 @@ export default function ScheduleMyMeterForm() {
     const submittedAt = new Date().toLocaleString();
     navigate("/customer/my_meter_scheduling", {
       state: {
-        message: "Meter installation visit form submitted successfully!",
+        message: "Meter installation visit scheduled successfully!",
         submittedAt,
+        formData, // 👈 Send the whole form
       },
     });
   };
@@ -79,6 +80,18 @@ export default function ScheduleMyMeterForm() {
           className="w-full p-2 border rounded-lg"
         />
 
+        <div>
+          <label className="block text-gray-700 mb-1">Enter your preferred date of schedule</label>
+          <input
+            type="date"
+            name="preferredDate"
+            value={formData.preferredDate}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded-lg"
+          />
+        </div>
+        
         <select
           name="purpose"
           value={formData.purpose}
@@ -111,7 +124,7 @@ export default function ScheduleMyMeterForm() {
             type="submit"
             className="bg-[#01217e] text-white px-6 py-2 rounded-lg hover:bg-[#fcbe03] transition"
           >
-            Schedule It
+            Schedule
           </button>
         </div>
       </form>

@@ -10,33 +10,29 @@ export default function EngineerSchedule() {
   const location = useLocation();
 
   const { state } = location;
-
-  // Load submission message if redirected from form
   const hasAddedSubmission = useRef(false);
 
   useEffect(() => {
-    if (state?.message && !hasAddedSubmission.current) {
-      setSubmissions((prev) => [
-        ...prev,
-        {
-          message: state.message,
-          submittedAt: state.submittedAt,
-          status: "Pending",
-        },
-      ]);
+  if (state?.message && !hasAddedSubmission.current) {
+    setSubmissions((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        message: state.message,
+        submittedAt: state.submittedAt,
+        status: "Pending",
+        formData: state.formData || null, // ⬅️ include form details
+      },
+    ]);
 
-      hasAddedSubmission.current = true;
-
-      // Clear the state after processing
-      navigate(location.pathname, { replace: true, state: {} });
-    }
+    hasAddedSubmission.current = true;
+    navigate(location.pathname, { replace: true, state: {} });
+  }
   }, [state, navigate, location.pathname]);
-
-
 
   const handleNext = () => {
     if (/^\d{12}$/.test(consumerNumber)) {
-      navigate("/customer/schedule_my_engineer_form",{
+      navigate("/customer/schedule_my_engineer_form", {
         state: { consumerNumber },
       });
     } else {
@@ -53,6 +49,20 @@ export default function EngineerSchedule() {
     setSubmissions((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleCancelSchedule = (id) => {
+    setSubmissions((prev) =>
+      prev.map((submission) =>
+        submission.id === id
+          ? {
+              ...submission,
+              status: "Cancelled",
+              message: "Engineer visit cancelled.",
+            }
+          : submission
+      )
+    );
+  };
+
   return (
     <div className="flex h-screen bg-[#f4f6fa] relative">
       <Navbar type="customer" />
@@ -62,36 +72,55 @@ export default function EngineerSchedule() {
         {/* Submission boxes aligned top-left */}
         {submissions.length > 0 && (
           <div className="absolute top-6 left-6 space-y-4 z-10">
-            {submissions.map((submission, index) => (
-              <div
-                key={index}
-                className="bg-white shadow-md border border-gray-300 rounded-lg p-4 w-80 relative"
+            {submissions.map((submission) => (
+            <div
+              key={submission.id}
+              className="bg-white shadow-md border border-gray-300 rounded-lg p-4 w-80 relative"
+            >
+              <p className="text-gray-800 font-medium mb-1">
+                {submission.message}
+              </p>
+              <p className="text-sm text-gray-600 mb-2">
+                Submitted on: {submission.submittedAt}
+              </p>
+
+              {submission.formData && (
+                <div className="text-sm text-gray-700 mt-2 space-y-1">
+                  <p><strong>Name:</strong> {submission.formData.name}</p>
+                  <p><strong>District:</strong> {submission.formData.district}</p>
+                  <p><strong>Subdivision:</strong> {submission.formData.subdivision}</p>
+                  <p><strong>Address:</strong> {submission.formData.address}</p>
+                  <p><strong>Purpose:</strong> {submission.formData.purpose}</p>
+                  <p><strong>Reason:</strong> {submission.formData.reason}</p>
+                  <p><strong>Preferred Date:</strong> {submission.formData.preferredDate}</p>
+                </div>
+              )}
+
+              <span
+                className={`inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full ${
+                  submission.status === "Pending"
+                    ? "bg-yellow-200 text-yellow-800"
+                    : submission.status === "Accepted"
+                    ? "bg-green-200 text-green-800"
+                    : submission.status === "Rejected"
+                    ? "bg-red-100 text-red-800 border border-red-300"
+                    : "bg-red-200 text-red-800"
+                }`}
               >
+                {submission.status}
+              </span>
+
+              {submission.status === "Pending" && (
                 <button
-                  onClick={() => handleRemoveSubmission(index)}
-                  className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg font-bold"
+                  onClick={() => handleCancelSchedule(submission.id)}
+                  className="mt-3 text-sm bg-red-400 px-3 py-1 rounded-md text-white font-medium hover:bg-red-600"
                 >
-                  ×
+                  Cancel Schedule
                 </button>
-                <p className="text-gray-800 font-medium mb-1">
-                  {submission.message}
-                </p>
-                <p className="text-sm text-gray-600 mb-2">
-                  Submitted on: {submission.submittedAt}
-                </p>
-                <span
-                  className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
-                    submission.status === "Pending"
-                      ? "bg-yellow-200 text-yellow-800"
-                      : submission.status === "Accepted"
-                      ? "bg-green-200 text-green-800"
-                      : "bg-red-200 text-red-800"
-                  }`}
-                >
-                  {submission.status}
-                </span>
-              </div>
-            ))}
+              )}
+            </div>
+          ))}
+
           </div>
         )}
 
@@ -136,8 +165,6 @@ export default function EngineerSchedule() {
           </div>
         </div>
       </div>
-
-
     </div>
   );
 }
