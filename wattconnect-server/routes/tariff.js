@@ -12,6 +12,18 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET LT tariffs
+router.get("/lt", async (req, res) => {
+  try {
+    const data = await Tariff.find({ type: "LT" });
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Error fetching LT tariffs:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 // GET HT tariffs
 router.get("/ht", async (req, res) => {
   try {
