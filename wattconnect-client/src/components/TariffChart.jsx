@@ -19,7 +19,6 @@ export default function LtHtTariffChart() {
     axios
       .get("http://localhost:5000/api/tariffs")
       .then((res) => {
-        console.log("✅ Tariffs fetched:", res.data);
         setTariffs(res.data);
       })
       .catch((err) => console.error("❌ Failed to load tariff data", err));
@@ -28,49 +27,61 @@ export default function LtHtTariffChart() {
   const ltTariffs = tariffs.filter((t) => t.type === "LT");
   const htTariffs = tariffs.filter((t) => t.type === "HT");
 
-  const ltLabels = ltTariffs.map((t) =>
-    typeof t.category === "string" ? `LT: ${t.category}` : "LT: Unknown"
-  );
-  const htLabels = htTariffs.map((t) =>
-    typeof t.category === "string" ? `HT: ${t.category}` : "HT: Unknown"
+  const allTariffs = [...ltTariffs, ...htTariffs];
+
+  const labels = allTariffs.map((t) =>
+    typeof t.category === "string" ? `${t.type}: ${t.category}` : `${t.type}: Unknown`
   );
 
   const chartData = {
-    labels: [...ltLabels, ...htLabels],
+    labels,
     datasets: [
       {
         label: "Effective Rate (₹/kWh)",
-        data: [...ltTariffs, ...htTariffs].map((t) =>
+        data: allTariffs.map((t) =>
           typeof t.effectiveRate === "number" ? t.effectiveRate : 0
         ),
-        backgroundColor: [
-          ...ltTariffs.map(() => "rgba(54,162,235,0.7)"),
-          ...htTariffs.map(() => "rgba(255,99,132,0.7)"),
-        ],
+        backgroundColor: allTariffs.map((t) =>
+          t.type === "HT" ? "rgba(255,99,132,0.7)" : "rgba(54,162,235,0.7)"
+        ),
       },
     ],
   };
 
   return (
     <div className="p-4 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-bold mb-4 text-center">
-        LT vs HT Tariff Comparison
-      </h2>
+      <h2 className="text-xl font-bold mb-4 text-center">LT vs HT Tariff Comparison</h2>
       <Bar
         data={chartData}
         options={{
           responsive: true,
           plugins: {
             legend: { display: true, position: "top" },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const index = context.dataIndex;
+                  const t = allTariffs[index];
+                  return [
+                    `Effective Rate: ₹${t.effectiveRate?.toFixed(2)}`,
+                    `Fixed Charge: ₹${t.fixedCharge ?? 'N/A'}`,
+                    `Energy Charge: ₹${t.energyCharge ?? 'N/A'}`,
+                  ];
+                },
+              },
+            },
           },
           scales: {
             y: {
-              title: { display: true, text: "₹ per kWh" },
+              title: {
+                display: true,
+                text: "₹ per kWh",
+              },
               beginAtZero: true,
             },
             x: {
               ticks: {
-                callback: function (value, index, ticks) {
+                callback: (val, index, ticks) => {
                   const label = chartData.labels[index];
                   return typeof label === "string" && label.length > 20
                     ? label.substring(0, 20) + "…"
