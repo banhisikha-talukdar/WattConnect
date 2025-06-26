@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 
 export default function ScheduleMyMeterForm() {
   const navigate = useNavigate();
@@ -10,6 +12,7 @@ export default function ScheduleMyMeterForm() {
     address: "",
     purpose: "domestic",
     reason: "",
+    preferredDate: "", 
   });
 
   const handleChange = (e) => {
@@ -17,17 +20,41 @@ export default function ScheduleMyMeterForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const submittedAt = new Date().toLocaleString();
-    navigate("/customer/my_meter_scheduling", {
-      state: {
-        message: "Meter installation visit scheduled successfully!",
-        submittedAt,
-        formData, // 👈 Send the whole form
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    district: formData.district,
+    subdivision: formData.subdivision,
+    applicantName: formData.name,      
+    address: formData.address,
+    preferredDate: formData.preferredDate,
+    usageType: formData.purpose,   
+    reason: formData.reason,
+    consumerNumber: "123456789012",   
+  };
+
+  try {
+    await axios.post("http://localhost:5000/api/schedule/meter", payload, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-  };
+
+    const submittedAt = new Date().toLocaleString();
+
+    navigate("/customer/my_meter_scheduling", {
+      state: {
+        message: `Meter installation visit scheduled for ${formData.preferredDate}!`,
+        submittedAt,
+        formData,
+      },
+    });
+  } catch (err) {
+    console.error("❌ Submission failed:", err);
+    alert("Error submitting engineer schedule form.");
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#f2f6fc] p-6">
@@ -39,7 +66,6 @@ export default function ScheduleMyMeterForm() {
           Meter Installation Visit Form
         </h2>
 
-        {/* Form fields remain unchanged */}
         <input
           type="text"
           name="district"
@@ -91,7 +117,7 @@ export default function ScheduleMyMeterForm() {
             className="w-full p-2 border rounded-lg"
           />
         </div>
-        
+
         <select
           name="purpose"
           value={formData.purpose}

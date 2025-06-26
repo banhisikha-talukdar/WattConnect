@@ -21,10 +21,9 @@ export default function MeterSchedule() {
           message: state.message,
           submittedAt: state.submittedAt,
           status: "Pending",
-          formData: state.formData || null, // ⬅️ include form details
+          formData: state.formData || null,
         },
       ]);
-
       hasAddedSubmission.current = true;
       navigate(location.pathname, { replace: true, state: {} });
     }
@@ -60,18 +59,21 @@ export default function MeterSchedule() {
   };
 
   return (
-    <div className="flex h-screen bg-[#f4f6fa] relative">
-      <Navbar type="customer" />
+    <div className="flex min-h-screen bg-[#f4f6fa]">
+      {/* Sidebar */}
+      <div className="w-64 shrink-0">
+        <Navbar type="customer" />
+      </div>
 
-      {/* Main content area */}
-      <div className="flex flex-1 p-6 relative">
-        {/* Submission boxes aligned top-left */}
+      {/* Main area */}
+      <div className="flex-1 p-4 md:p-6 relative flex flex-col md:flex-row gap-6">
+        {/* Submissions - left aligned */}
         {submissions.length > 0 && (
-          <div className="absolute top-6 left-6 space-y-4 z-10">
+          <div className="space-y-4 w-full md:w-[22rem] overflow-y-auto">
             {submissions.map((submission) => (
               <div
                 key={submission.id}
-                className="bg-white shadow-md border border-gray-300 rounded-lg p-4 w-80 relative"
+                className="bg-white shadow-md border border-gray-300 rounded-lg p-4"
               >
                 <p className="text-gray-800 font-medium mb-1">
                   {submission.message}
@@ -91,7 +93,7 @@ export default function MeterSchedule() {
                     <p><strong>Preferred Date:</strong> {submission.formData.preferredDate}</p>
                   </div>
                 )}
-                
+
                 <span
                   className={`inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full ${
                     submission.status === "Pending"
@@ -119,28 +121,25 @@ export default function MeterSchedule() {
           </div>
         )}
 
-        {/* Consumer number input — shifts to top-right if submission exists, otherwise centers */}
-        <div
-          className={`transition-all duration-300 absolute ${
-            submissions.length > 0
-              ? "top-6 right-6"
-              : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-          }`}
-        >
-          <div className="bg-white shadow-md rounded-xl p-8 w-[350px]">
+        {/* Consumer Input - right aligned or centered if no submissions */}
+          <div className={`flex w-full ${submissions.length === 0
+            ? "justify-center items-center min-h-[70vh]"
+            : "justify-end items-start"
+          }`}>
+          <div className="w-full max-w-sm bg-white shadow-md rounded-xl p-6">
             <h2 className="text-xl font-semibold text-[#01217e] mb-4">
               Schedule Meter Installation Visit
             </h2>
             <label className="block text-gray-700 mb-2">
               Enter 12-digit Consumer Number
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 maxLength={12}
                 value={consumerNumber}
                 onChange={(e) => setConsumerNumber(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="flex-1 border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="e.g. 123456789012"
               />
               <button

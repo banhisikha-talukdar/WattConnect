@@ -48,8 +48,8 @@ export default function Navbar({ type }) {
               `}>
                 <div className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg w-full h-full
                   ${isActive
-                    ? 'bg-[#f4f6fa] font-semibold text-[#01217e]'
-                    : 'bg-[#f4f6fa] text-gray-600 hover:text-blue-500'}
+                    ? 'bg-[#dfeafa] font-semibold text-[#01217e]'
+                    : 'bg-[#dfeafa] text-gray-600 hover:text-blue-500'}
                 `}>
                   {link.icon}
                   <span>{link.name}</span>
