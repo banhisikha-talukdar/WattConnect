@@ -6,6 +6,7 @@ const usageSchema = new mongoose.Schema({
   month: { type: String, required: true },
   year: { type: Number, required: true },
   unitsUsed: { type: Number, required: true },
+  usageType: { type: String, enum: ['domestic', 'commercial'], required: true },
   createdAt: { type: Date, default: Date.now }
 });
 

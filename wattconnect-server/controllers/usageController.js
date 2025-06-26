@@ -1,19 +1,24 @@
 const Usage = require("../models/Usage");
 
 exports.logUsage = async (req, res) => {
-  const { month, year, unitsUsed } = req.body;
+  const { month, year, unitsUsed, usageType } = req.body;
 
-  if (!month || !year || !unitsUsed) {
+  if (!month || !year || !unitsUsed || !usageType) {
     return res.status(400).json({ error: "All fields are required" });
+  }
+
+  if (!['domestic', 'commercial'].includes(usageType)) {
+    return res.status(400).json({ error: "Invalid usage type" });
   }
 
   try {
     const usage = new Usage({
-      userId: req.user.userId,
-      username: req.user.username,
+      userId: req.userId,
+      username: req.username,
       month,
       year,
-      unitsUsed
+      unitsUsed,
+      usageType
     });
 
     await usage.save();
