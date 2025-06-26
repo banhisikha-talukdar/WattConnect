@@ -34,7 +34,7 @@ export default function Navbar({ type }) {
   ];
 
   return (
-    <aside className="w-68 bg-[#dfeafa] shadow-xl p-6 h-screen">
+    <aside className="w-68 bg-[#f4f6fa] shadow-xl p-6 h-screen">
       <h2 className="text-xl text-blue-700 font-bold mb-4">WattConnect</h2>
       <ul className="space-y-3">
         {links.map((link, index) => {
@@ -48,8 +48,8 @@ export default function Navbar({ type }) {
               `}>
                 <div className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg w-full h-full
                   ${isActive
-                    ? 'bg-[#dfeafa] font-semibold text-[#01217e]'
-                    : 'bg-[#dfeafa] text-gray-600 hover:text-blue-500'}
+                    ? 'bg-[#f4f6fa] font-semibold text-[#01217e]'
+                    : 'bg-[#f4f6fa] text-gray-600 hover:text-blue-500'}
                 `}>
                   {link.icon}
                   <span>{link.name}</span>
