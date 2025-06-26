@@ -34,7 +34,7 @@ export default function Navbar({ type }) {
   ];
 
   return (
-    <aside className="w-68 bg-[#f4f6fa] shadow-xl p-6 h-full">
+    <aside className="w-68 bg-[#dfeafa] shadow-xl p-6 h-screen">
       <h2 className="text-xl text-blue-700 font-bold mb-4">WattConnect</h2>
       <ul className="space-y-3">
         {links.map((link, index) => {
