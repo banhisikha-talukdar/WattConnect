@@ -1,6 +1,7 @@
 import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import TariffChart from "../../components/TariffChart";
+import UsageChart from "../../components/UsageChart"; 
 
 const username = "Customer";
 
@@ -38,6 +39,13 @@ export default function CustomerDashboard() {
           <TariffChart />
         </div>
 
+        {/* Usage Chart */}
+        <div className="mt-10 bg-white p-6 rounded-2xl shadow-md max-w-5xl">
+          <h3 className="text-xl font-semibold text-gray-700 mb-4">
+            Monthly Usage Overview
+          </h3>
+          <UsageChart />
+        </div>
       </main>
     </div>
   );
