@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const usageRoutes = require('./routes/usage');
 //const applicationRoutes = require('./routes/application');
 const tariffRoutes = require("./routes/tariff");
+const scheduleRoutes = require('./routes/schedule');
 
 dotenv.config();
 connectDB();
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usage', usageRoutes);
 //app.use('/api/application', applicationRoutes);
 app.use("/api/tariffs", tariffRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

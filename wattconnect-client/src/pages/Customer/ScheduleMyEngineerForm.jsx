@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 
 export default function ScheduleMyEngineerForm() {
   const navigate = useNavigate();
@@ -10,7 +12,7 @@ export default function ScheduleMyEngineerForm() {
     address: "",
     purpose: "domestic",
     reason: "",
-    preferredDate: "", // New field
+    preferredDate: "", 
   });
 
   const handleChange = (e) => {
@@ -18,18 +20,41 @@ export default function ScheduleMyEngineerForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    district: formData.district,
+    subdivision: formData.subdivision,
+    applicantName: formData.name,      
+    address: formData.address,
+    preferredDate: formData.preferredDate,
+    usageType: formData.purpose,   
+    reason: formData.reason,
+    consumerNumber: "123456789012",   
+  };
+
+  try {
+    await axios.post("http://localhost:5000/api/schedule/engineer", payload, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
     const submittedAt = new Date().toLocaleString();
 
     navigate("/customer/my_engineer_scheduling", {
       state: {
         message: `Engineer visit scheduled for ${formData.preferredDate}!`,
         submittedAt,
-        formData, // 👈 Send the whole form
+        formData,
       },
     });
-  };
+  } catch (err) {
+    console.error("❌ Submission failed:", err);
+    alert("Error submitting engineer schedule form.");
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#f2f6fc] p-6">
