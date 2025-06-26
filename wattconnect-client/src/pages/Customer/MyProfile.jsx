@@ -13,7 +13,7 @@ export default function Profile() {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:5000/api/customers/me', {
+        const res = await axios.get('http://localhost:5000/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProfile({
@@ -37,7 +37,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:5000/api/customers/${profile.username}`,
+        `http://localhost:5000/api/auth/${profile.username}`,
         { username: profile.username, email: profile.email },
         { headers: { Authorization: `Bearer ${token}` } }
       );

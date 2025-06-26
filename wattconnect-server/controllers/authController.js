@@ -120,3 +120,55 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+
+// Profile ME
+exports.getMe = async (req, res) => {
+  console.log("✅ /me route hit. Decoded token:", req.user);
+  try {
+    const user = await User.findById(req.user.userId).select('username email');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      username: user.username,
+      email: user.email
+    });
+  } catch (err) {
+    console.error('❌ Error in getMe controller:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Profile Update
+exports.updateProfile = async (req, res) => {
+  console.log("🔧 Update profile attempt by:", req.user);
+  try {
+    const { username } = req.params;
+    const { email } = req.body;
+
+    if (req.user.username !== username) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { username },
+      { $set: { email } }, 
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      message: 'Profile updated successfully',
+      username: updatedUser.username,
+      email: updatedUser.email,
+    });
+  } catch (err) {
+    console.error('❌ Error updating profile:', err);
+    res.status(500).json({ message: 'Server error during profile update' });
+  }
+};
