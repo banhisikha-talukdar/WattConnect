@@ -90,8 +90,8 @@ export default function SubmitUsageForm() {
         className="border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#226c82]"
       >
         <option value="">Select Usage Type</option>
-        <option value="Domestic">Domestic</option>
-        <option value="Commercial">Commercial</option>
+        <option value="domestic">Domestic</option>
+        <option value="commercial">Commercial</option>
       </select>
 
       <div className="flex justify-between gap-4">
