@@ -13,8 +13,8 @@ exports.logUsage = async (req, res) => {
 
   try {
     const usage = new Usage({
-      userId: req.userId,
-      username: req.username,
+      userId: req.user.userId,
+      username: req.user.username,
       month,
       year,
       unitsUsed,
@@ -31,7 +31,7 @@ exports.logUsage = async (req, res) => {
 
 exports.getUsage = async (req, res) => {
   try {
-    const usageData = await Usage.find({ userId: req.userId }).sort({ createdAt: 1 });
+    const usageData = await Usage.find({ userId: req.user.userId }).sort({ createdAt: 1 });
     res.json(usageData);
   } catch (err) {
     console.error("❌ Fetch usage error:", err);
