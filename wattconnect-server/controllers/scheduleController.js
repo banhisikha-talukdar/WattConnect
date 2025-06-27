@@ -78,3 +78,23 @@ exports.scheduleEngineerVisit = async (req, res) => {
     res.status(500).json({ error: 'Server error while scheduling engineer visit' });
   }
 };
+
+exports.getSchedules = async (req, res) => {
+  const { type, consumerNumber } = req.query;
+
+  if (type && !['meter', 'engineer'].includes(type)) {
+    return res.status(400).json({ error: 'Invalid type. Must be "meter" or "engineer"' });
+  }
+
+  try {
+    const query = {};
+    if (type) query.formType = type;
+    if (consumerNumber) query.consumerNumber = consumerNumber;
+
+    const schedules = await Schedule.find(query).sort({ preferredDate: 1 });
+    res.status(200).json(schedules);
+  } catch (err) {
+    console.error('❌ Fetch schedule error:', err);
+    res.status(500).json({ error: 'Server error while fetching schedules' });
+  }
+};
