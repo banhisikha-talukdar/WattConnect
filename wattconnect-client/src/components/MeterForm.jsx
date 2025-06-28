@@ -1,5 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 export default function MeterForm() {
   const [formData, setFormData] = useState({
@@ -36,6 +38,8 @@ export default function MeterForm() {
         }
       );
       alert("Meter schedule submitted successfully!");
+      navigate("/customer/my_meter_scheduling");
+      console.log("✅ Response:", res.data);
     } catch (err) {
       console.error("❌ Submission error:", err.response?.data || err.message);
       alert("Error submitting form");
