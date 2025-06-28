@@ -15,7 +15,18 @@ export default function EngineerScheduling() {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
-        setRequests(res.data);
+
+        console.log("API response for engineer requests:", res.data);
+
+        // ✅ Robust response handling
+        if (Array.isArray(res.data)) {
+          setRequests(res.data);
+        } else if (Array.isArray(res.data.data)) {
+          setRequests(res.data.data);
+        } else {
+          console.error("Unexpected API response format:", res.data);
+        }
+
       } catch (err) {
         console.error("Error fetching engineer requests:", err);
       }

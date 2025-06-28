@@ -12,20 +12,10 @@ export default function EngineerSchedule() {
 
   const { state } = location;
 
+  // When redirected from the form with new submission, pre-fill consumer number
   useEffect(() => {
-    if (state?.formData && state?.submittedAt) {
-      const newSubmission = {
-        id: Date.now(),
-        message: state.message,
-        submittedAt: state.submittedAt,
-        status: "Pending",
-        formData: state.formData,
-        consumerNumber: state.formData.consumerNumber,
-      };
-
-      axios.post("/api/schedule/engineer", newSubmission)
-        .then(() => setSubmissions((prev) => [...prev, newSubmission]))
-        .catch((err) => console.error("Failed to save:", err));
+    if (state?.formData?.consumerNumber) {
+      setConsumerNumber(state.formData.consumerNumber);
     }
   }, [state]);
 
@@ -40,20 +30,50 @@ export default function EngineerSchedule() {
             consumerNumber: consumerNumber,
           },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // optional if needed
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
 
-        const filtered = result.data.filter((item) => item.status === "Pending");
-        setSubmissions(filtered);
+        // 🛠️ Fix: ensure result.data is an array
+        const responseData = Array.isArray(result.data)
+          ? result.data
+          : Array.isArray(result.data.data)
+          ? result.data.data
+          : [];
+
+        const filtered = responseData.filter(
+          (item) => item.status === "Pending"
+        );
+
+        // If a new form was just submitted (from EngineerForm), show it too
+        if (state?.formData) {
+          const newSubmission = {
+            id: Date.now(),
+            message: "Submitted successfully",
+            submittedAt: new Date().toLocaleString(),
+            status: "Pending",
+            formData: state.formData,
+            consumerNumber: state.formData.consumerNumber,
+          };
+
+          // Avoid duplication
+          const isDuplicate = filtered.some(
+            (item) =>
+              item.formData?.consumerNumber === newSubmission.formData.consumerNumber &&
+              item.formData?.preferredDate === newSubmission.formData.preferredDate
+          );
+
+          setSubmissions(isDuplicate ? filtered : [newSubmission, ...filtered]);
+        } else {
+          setSubmissions(filtered);
+        }
       } catch (error) {
         console.error("Error fetching submissions:", error);
       }
     };
 
     fetchSubmissions();
-  }, [consumerNumber]);
-
+  }, [consumerNumber, state]);
 
   const handleNext = () => {
     if (/^\d{12}$/.test(consumerNumber)) {
@@ -118,7 +138,7 @@ export default function EngineerSchedule() {
               className="bg-white shadow-md border border-gray-300 rounded-lg p-4"
             >
               <p className="text-gray-800 font-medium mb-1">
-                {submission.message}
+                {submission.message || "Submitted request"}
               </p>
               <p className="text-sm text-gray-600 mb-2">
                 Submitted on: {submission.submittedAt}
