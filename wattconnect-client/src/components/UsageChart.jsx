@@ -52,6 +52,7 @@ const processDataByYear = (data) => {
 
 export default function UsageChart() {
   const [usageData, setUsageData] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -69,12 +70,10 @@ export default function UsageChart() {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        console.log("✅ Usage data fetched:", res.data);
         setUsageData(res.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("❌ Failed to load usage data", err);
         setError("Failed to load usage data.");
         setLoading(false);
       });

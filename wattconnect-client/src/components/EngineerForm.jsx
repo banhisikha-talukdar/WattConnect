@@ -1,11 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
 
 export default function EngineerForm() {
-  const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     consumerNumber: "",
     district: "",
@@ -16,6 +12,8 @@ export default function EngineerForm() {
     usageType: "domestic",
     reason: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,7 +27,7 @@ export default function EngineerForm() {
         "http://localhost:5000/api/schedule/engineer",
         {
           ...formData,
-          formType: "engineer", 
+          formType: "engineer",
         },
         {
           headers: {
@@ -38,7 +36,6 @@ export default function EngineerForm() {
         }
       );
       alert("Engineer schedule submitted successfully!");
-      navigate("/customer/my_engineer_scheduling");
       console.log("✅ Response:", res.data);
     } catch (err) {
       console.error("❌ Submission error:", err.response?.data || err.message);
@@ -49,79 +46,97 @@ export default function EngineerForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-8 bg-white rounded-xl shadow-md max-w-xl mx-auto space-y-4"
+      className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-10 space-y-6"
     >
-      <h2 className="text-xl font-bold mb-4">Engineer Visit Form</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-center text-[#01217e] mb-2">
+        Engineer Visit Scheduling Form
+      </h2>
 
-      <input
-        name="consumerNumber"
-        placeholder="12-digit Consumer Number"
-        maxLength={12}
-        required
-        onChange={handleChange}
-        className="input"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          name="consumerNumber"
+          placeholder="12-digit Consumer Number"
+          maxLength={12}
+          required
+          onChange={handleChange}
+          className="w-sm border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
-      <input
-        name="district"
-        placeholder="District"
-        required
-        onChange={handleChange}
-        className="input"
-      />
+        <input
+          name="district"
+          placeholder="District"
+          required
+          onChange={handleChange}
+          className="w-sm border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
-      <input
-        name="subdivision"
-        placeholder="Subdivision (City/Town)"
-        required
-        onChange={handleChange}
-        className="input"
-      />
+        <input
+          name="subdivision"
+          placeholder="Subdivision (City/Town)"
+          required
+          onChange={handleChange}
+          className="w-sm border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
-      <input
-        name="applicantName"
-        placeholder="Name of Applicant"
-        required
-        onChange={handleChange}
-        className="input"
-      />
+        <input
+          name="applicantName"
+          placeholder="Name of Applicant"
+          required
+          onChange={handleChange}
+          className="w-sm border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
-      <input
-        name="address"
-        placeholder="Address"
-        required
-        onChange={handleChange}
-        className="input"
-      />
+        <input
+          name="address"
+          placeholder="Address"
+          required
+          onChange={handleChange}
+          className="w-full border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400 col-span-full"
+        />
 
-      <input
-        type="date"
-        name="preferredDate"
-        required
-        onChange={handleChange}
-        className="input"
-      />
+        <input
+          type="date"
+          name="preferredDate"
+          required
+          onChange={handleChange}
+          className="w-sm border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
-      <select
-        name="usageType"
-        value={formData.usageType}
-        onChange={handleChange}
-        className="input"
-      >
-        <option value="domestic">Domestic</option>
-        <option value="commercial">Commercial</option>
-      </select>
+        <select
+          name="usageType"
+          value={formData.usageType}
+          onChange={handleChange}
+          className="w-sm border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          <option value="domestic">Domestic</option>
+          <option value="commercial">Commercial</option>
+        </select>
+      </div>
 
       <textarea
         name="reason"
-        placeholder="Write your reason for scheduling the visit..."
+        placeholder="Reason for scheduling the visit..."
+        required
         onChange={handleChange}
-        className="input"
+        rows={4}
+        className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
       />
 
-      <button type="submit" className="btn">
-        Submit
-      </button>
+      <div className="text-center mt-4 flex justify-center gap-4">
+        <button
+          type="submit"
+          className="bg-[#01217e] hover:bg-[#fcbe03] text-white font-semibold px-6 py-2 rounded-lg transition"
+        >
+          Submit Request
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="bg-gray-300 hover:bg-gray-500 text-black font-semibold px-6 py-2 rounded-lg transition"
+        >
+          ← Go Back
+        </button>
+      </div>
     </form>
   );
 }
