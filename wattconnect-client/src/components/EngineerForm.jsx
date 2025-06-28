@@ -1,7 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 export default function EngineerForm() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     consumerNumber: "",
     district: "",
@@ -34,6 +38,7 @@ export default function EngineerForm() {
         }
       );
       alert("Engineer schedule submitted successfully!");
+      navigate("/customer/my_engineer_scheduling");
       console.log("✅ Response:", res.data);
     } catch (err) {
       console.error("❌ Submission error:", err.response?.data || err.message);
