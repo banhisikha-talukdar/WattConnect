@@ -20,7 +20,6 @@ const monthOrder = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-// Process data grouped by year
 const processDataByYear = (data) => {
   const yearlyData = {};
 
@@ -79,6 +78,15 @@ export default function UsageChart() {
       });
   }, [token]);
 
+  const yearlyProcessed = processDataByYear(usageData);
+  const yearKeys = Object.keys(yearlyProcessed);
+
+  useEffect(() => {
+    if (yearKeys.length > 0 && !selectedYear) {
+      setSelectedYear(yearKeys[0]); // Default to first year
+    }
+  }, [yearKeys]);
+
   if (loading) {
     return <p className="text-center text-gray-500 py-4">Loading usage data...</p>;
   }
@@ -87,11 +95,32 @@ export default function UsageChart() {
     return <p className="text-center text-red-500 py-4">{error}</p>;
   }
 
-  const yearlyProcessed = processDataByYear(usageData);
-  const yearKeys = Object.keys(yearlyProcessed);
-
   if (yearKeys.length === 0) {
     return <p className="text-center text-gray-500 py-4">No usage data available.</p>;
+  }
+
+  const selectedData = yearlyProcessed[selectedYear];
+
+  const datasets = [];
+  if (selectedData?.hasDomestic) {
+    datasets.push({
+      label: "Domestic Usage",
+      data: selectedData.domestic,
+      borderColor: "#3B82F6",
+      backgroundColor: "#3B82F6",
+      tension: 0.4,
+      pointBackgroundColor: "#3B82F6",
+    });
+  }
+  if (selectedData?.hasCommercial) {
+    datasets.push({
+      label: "Commercial Usage",
+      data: selectedData.commercial,
+      borderColor: "#F97316",
+      backgroundColor: "#F97316",
+      tension: 0.4,
+      pointBackgroundColor: "#F97316",
+    });
   }
 
   const baseOptions = {
@@ -103,7 +132,7 @@ export default function UsageChart() {
       },
       title: {
         display: true,
-        text: "",
+        text: `Monthly Usage for ${selectedYear}`,
       },
     },
     scales: {
@@ -119,65 +148,37 @@ export default function UsageChart() {
   };
 
   return (
-    <div className="space-y-12">
-      {yearKeys.map((year) => {
-        const yearData = yearlyProcessed[year];
+    <div className="space-y-6 w-full max-w-4xl mx-auto">
+      <div className="mb-4">
+        <label htmlFor="year" className="block text-gray-700 font-medium mb-2">Select Year</label>
+        <select
+          id="year"
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
+          className="border border-gray-300 rounded px-4 py-2 text-gray-800"
+        >
+          {yearKeys.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        // If both types are missing, skip chart rendering
-        if (!yearData.hasDomestic && !yearData.hasCommercial) {
-          return null;
-        }
-
-        const datasets = [];
-        if (yearData.hasDomestic) {
-          datasets.push({
-            label: "Domestic Usage",
-            data: yearData.domestic,
-            borderColor: "#3B82F6",
-            backgroundColor: "#3B82F6",
-            tension: 0.4,
-            pointBackgroundColor: "#3B82F6",
-          });
-        }
-        if (yearData.hasCommercial) {
-          datasets.push({
-            label: "Commercial Usage",
-            data: yearData.commercial,
-            borderColor: "#F97316",
-            backgroundColor: "#F97316",
-            tension: 0.4,
-            pointBackgroundColor: "#F97316",
-          });
-        }
-
-        return (
-          <div
-            key={year}
-            className="bg-white rounded-xl shadow-lg p-6 w-full max-w-4xl mx-auto"
-          >
-            <h4 className="text-lg font-semibold mb-4 text-gray-800">
-              Electricity Usage - {year}
-            </h4>
-            <Line
-              data={{
-                labels: yearData.labels,
-                datasets,
-              }}
-              options={{
-                ...baseOptions,
-                plugins: {
-                  ...baseOptions.plugins,
-                  title: {
-                    display: true,
-                    text: `Monthly Usage for ${year}`,
-                  },
-                },
-              }}
-              height={300}
-            />
-          </div>
-        );
-      })}
+      {datasets.length > 0 ? (
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <Line
+            data={{
+              labels: selectedData.labels,
+              datasets,
+            }}
+            options={baseOptions}
+            height={300}
+          />
+        </div>
+      ) : (
+        <p className="text-center text-gray-500 py-4">No usage data available for {selectedYear}.</p>
+      )}
     </div>
   );
 }

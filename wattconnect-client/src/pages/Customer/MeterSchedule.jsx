@@ -30,17 +30,30 @@ export default function MeterSchedule() {
   }, [state]);
 
   useEffect(() => {
-    if (consumerNumber) {
-      axios.get(`/api/schedule?type=meter&consumerNumber=${consumerNumber}`)
-        .then((res) => {
-          const filtered = res.data.filter(
-            (item) => item.status === "Pending"
-          );
-          setSubmissions(filtered);
-        })
-        .catch((err) => console.error("Error fetching submissions:", err));
-    }
+    const fetchSubmissions = async () => {
+      if (!consumerNumber) return;
+
+      try {
+        const result = await axios.get("/api/schedule", {
+          params: {
+            type: "meter",
+            consumerNumber: consumerNumber,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // optional if needed
+          },
+        });
+
+        const filtered = result.data.filter((item) => item.status === "Pending");
+        setSubmissions(filtered);
+      } catch (error) {
+        console.error("Error fetching submissions:", error);
+      }
+    };
+
+    fetchSubmissions();
   }, [consumerNumber]);
+
 
   const handleNext = () => {
     if (/^\d{12}$/.test(consumerNumber)) {

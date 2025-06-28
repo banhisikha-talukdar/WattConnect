@@ -7,26 +7,49 @@ export default function EngineerScheduling() {
   const [selectedRequest, setSelectedRequest] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/schedule?type=engineer')
-      .then(res => setRequests(res.data))
-      .catch(err => console.error(err));
+    const fetchEngineerRequests = async () => {
+      try {
+        const res = await axios.get('/api/schedule', {
+          params: { type: 'engineer' },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        setRequests(res.data);
+      } catch (err) {
+        console.error("Error fetching engineer requests:", err);
+      }
+    };
+
+    fetchEngineerRequests();
   }, []);
 
-
-  const handleAccept = (id) => {
-    axios.put(`/api/schedule/engineer/${id}/accept`)
-      .then(() => {
-        setRequests(prev => prev.filter(r => r._id !== id));
-        setSelectedRequest(null);
+  const handleAccept = async (id) => {
+    try {
+      await axios.put(`/api/schedule/engineer/${id}/accept`, null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
+      setRequests(prev => prev.filter(r => r._id !== id));
+      setSelectedRequest(null);
+    } catch (err) {
+      console.error("Error accepting request:", err);
+    }
   };
 
-  const handleReject = (id) => {
-    axios.put(`/api/schedule/engineer/${id}/reject`)
-      .then(() => {
-        setRequests(prev => prev.filter(r => r._id !== id));
-        setSelectedRequest(null);
+  const handleReject = async (id) => {
+    try {
+      await axios.put(`/api/schedule/engineer/${id}/reject`, null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
+      setRequests(prev => prev.filter(r => r._id !== id));
+      setSelectedRequest(null);
+    } catch (err) {
+      console.error("Error rejecting request:", err);
+    }
   };
 
   return (
@@ -40,9 +63,9 @@ export default function EngineerScheduling() {
         <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${selectedRequest ? 'blur-sm pointer-events-none' : ''}`}>
           {requests.map((request) => (
             <div key={request._id} className="bg-white shadow-md rounded-lg p-4">
-              <p className="font-semibold text-gray-800 mb-1">{request.name}</p>
+              <p className="font-semibold text-gray-800 mb-1">{request.applicantName}</p>
               <p className="text-sm text-gray-600">Consumer #: {request.consumerNumber}</p>
-              <p className="text-sm text-gray-600 mb-4">Purpose: {request.purpose}</p>
+              <p className="text-sm text-gray-600 mb-4">Purpose: {request.usageType}</p>
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
                 onClick={() => setSelectedRequest(request)}
@@ -60,9 +83,9 @@ export default function EngineerScheduling() {
               <p><strong>Consumer Number:</strong> {selectedRequest.consumerNumber}</p>
               <p><strong>District:</strong> {selectedRequest.district}</p>
               <p><strong>Subdivision:</strong> {selectedRequest.subdivision}</p>
-              <p><strong>Name:</strong> {selectedRequest.name}</p>
+              <p><strong>Name:</strong> {selectedRequest.applicantName}</p>
               <p><strong>Address:</strong> {selectedRequest.address}</p>
-              <p><strong>Purpose:</strong> {selectedRequest.purpose}</p>
+              <p><strong>Purpose:</strong> {selectedRequest.usageType}</p>
               <p><strong>Reason:</strong> {selectedRequest.reason}</p>
               <p><strong>Preferred Date:</strong> {selectedRequest.preferredDate}</p>
             </div>
