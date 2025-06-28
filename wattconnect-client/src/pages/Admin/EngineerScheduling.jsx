@@ -9,7 +9,7 @@ export default function EngineerScheduling() {
   useEffect(() => {
     const fetchEngineerRequests = async () => {
       try {
-        const res = await axios.get('/api/schedule', {
+        const res = await axios.get('http://localhost:5000/api/schedule', {
           params: { type: 'engineer' },
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -18,17 +18,16 @@ export default function EngineerScheduling() {
 
         console.log("API response for engineer requests:", res.data);
 
-        // ✅ Robust response handling
-        if (Array.isArray(res.data)) {
-          setRequests(res.data);
-        } else if (Array.isArray(res.data.data)) {
-          setRequests(res.data.data);
-        } else {
-          console.error("Unexpected API response format:", res.data);
-        }
+        const requestList = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data.data)
+          ? res.data.data
+          : [];
 
+        setRequests(requestList);
       } catch (err) {
         console.error("Error fetching engineer requests:", err);
+        setRequests([]);
       }
     };
 
@@ -37,12 +36,12 @@ export default function EngineerScheduling() {
 
   const handleAccept = async (id) => {
     try {
-      await axios.put(`/api/schedule/engineer/${id}/accept`, null, {
+      await axios.put(`http://localhost:5000/api/schedule/engineer/${id}/accept`, null, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setRequests(prev => prev.filter(r => r._id !== id));
+      setRequests((prev) => prev.filter((r) => r._id !== id));
       setSelectedRequest(null);
     } catch (err) {
       console.error("Error accepting request:", err);
@@ -51,12 +50,12 @@ export default function EngineerScheduling() {
 
   const handleReject = async (id) => {
     try {
-      await axios.put(`/api/schedule/engineer/${id}/reject`, null, {
+      await axios.put(`http://localhost:5000/api/schedule/engineer/${id}/reject`, null, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setRequests(prev => prev.filter(r => r._id !== id));
+      setRequests((prev) => prev.filter((r) => r._id !== id));
       setSelectedRequest(null);
     } catch (err) {
       console.error("Error rejecting request:", err);

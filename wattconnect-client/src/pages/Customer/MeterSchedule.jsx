@@ -45,7 +45,7 @@ export default function MeterSchedule() {
           (item) => item.status === "Pending"
         );
 
-        // If a new form was just submitted (from EngineerForm), show it too
+        // If a new form was just submitted (from MeterForm), show it too
         if (state?.formData) {
           const newSubmission = {
             id: Date.now(),

@@ -11,7 +11,7 @@ export default function ScheduleMyEngineerForm() {
           const submittedAt = new Date().toLocaleString();
           navigate("/customer/my_engineer_scheduling", {
             state: {
-              message: `Engineer visit scheduled for ${formData.preferredDate}!`,
+              message: `Request for scheduled engineer visit done successfully!`,
               submittedAt,
               formData,
             },
