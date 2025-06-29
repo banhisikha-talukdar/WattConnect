@@ -63,11 +63,9 @@ export default function MeterScheduling() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f4f6fa]">
-      <div className="w-64 shrink-0">
+    <div className="flex h-screen bg-[#f4f6fa]">
         <Navbar type="admin" />
-      </div>
-      <main className="flex-1 p-6 relative">
+      <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
         <h1 className="text-2xl font-bold mb-6">Check the pending meter installation schedule requests here!</h1>
 
         <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${selectedRequest ? 'blur-sm pointer-events-none' : ''}`}>

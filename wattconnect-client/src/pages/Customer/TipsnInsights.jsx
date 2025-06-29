@@ -37,7 +37,7 @@ export default function TipsnInsights() {
   return (
     <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="customer" />
-      <main className="flex-1 p-10 overflow-auto">
+      <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-extrabold mb-4 text-gray-400 text-shadow-md/10">Energy Tips & Insights</h1>
           <p className="text-lg text-gray-500 mb-10">

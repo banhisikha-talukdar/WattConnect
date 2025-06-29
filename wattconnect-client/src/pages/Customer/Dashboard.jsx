@@ -15,38 +15,42 @@ export default function CustomerDashboard() {
   return (
     <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="customer" />
+      <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
+        {/* Top Section: Greeting + Add Button */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#3360ab] to-[#84a4da] drop-shadow-lg text-center sm:text-left">
+            Hi {username}, Welcome back!
+          </h1>
 
-      <main className="flex-1 p-8 overflow-y-auto relative">
-        {/* Greeting */}
-        <div className="mb-6">
-          <h2 className="text-3xl font-semibold text-black">Hi {username},</h2>
-          <p className="text-5xl font-bold text-black mt-1">Welcome back</p>
+          <button
+            onClick={handleAddNew}
+            className="mt-4 sm:mt-0 bg-[#01217e] hover:bg-[#fcbe03] text-white font-medium px-6 py-2 rounded-xl transition-all duration-300"
+          >
+            Add New
+          </button>
         </div>
 
-        {/* Add New Button */}
-        <button
-          onClick={handleAddNew}
-          className="absolute top-8 right-8 bg-[#01217e] hover:bg-[#fcbe03] text-white font-medium px-4 py-2 rounded-xl transition"
-        >
-          Add New
-        </button>
+        {/* Charts Section */}
+        <div className="max-w-5xl mx-auto space-y-10">
+          {/* Usage Chart */}
+          <div className="bg-white p-6 rounded-2xl shadow-md">
+            <h3 className="text-xl font-semibold text-gray-700 mb-4">
+              Monthly Usage Overview
+            </h3>
+            <UsageChart />
+          </div>
 
-        {/* Tariff Chart */}
-        <div className="mt-10 bg-white p-6 rounded-2xl shadow-md max-w-5xl">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4">
-            LT vs HT Tariff Comparison
-          </h3>
-          <TariffChart />
-        </div>
+          {/* Tariff Chart */}
+          <div className="bg-white p-6 rounded-2xl shadow-md">
+            <h3 className="text-xl font-semibold text-gray-700 mb-4">
+              LT vs HT Tariff Comparison
+            </h3>
+            <TariffChart />
+          </div>
 
-        {/* Usage Chart */}
-        <div className="mt-10 bg-white p-6 rounded-2xl shadow-md max-w-5xl">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4">
-            Monthly Usage Overview
-          </h3>
-          <UsageChart />
         </div>
       </main>
+
     </div>
   );
 }

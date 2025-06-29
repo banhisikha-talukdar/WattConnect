@@ -91,88 +91,87 @@ export default function MeterSchedule() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-[#f4f6fa]">
-      <div className="w-full lg:w-64 shrink-0">
-        <Navbar type="customer" />
-      </div>
-
-      <div className="flex-1 px-4 md:px-8 py-6">
-        <div className="max-w-xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold text-center text-[#01217e] mb-2">
+    <div className="flex h-screen bg-[#f4f6fa]">
+      <Navbar type="customer" />
+  
+      <main className="flex-1 px-4 sm:px-8 pt-20 pb-10 overflow-y-auto">
+        {/* Header + Input Form Section */}
+        <div className="w-full max-w-md mx-auto mb-6 sm:mb-10 sm:bg-white sm:p-8 p-4 bg-transparent sm:rounded-2xl sm:shadow-md shadow-none">
+          <h2 className="text-2xl font-bold text-[#01217e] mb-4 text-center">
             Schedule Meter Installation Visit
           </h2>
-          <label className="block text-center text-gray-700 mb-2">
-            Enter 12-digit Consumer Number
+
+          <label className="block text-gray-700 mb-2 text-center">
+            Enter your 12-digit Consumer Number
           </label>
-          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+  
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             <input
               type="text"
               maxLength={12}
               value={consumerNumber}
               onChange={(e) => setConsumerNumber(e.target.value)}
-              className="flex-1 border bg-white border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full sm:flex-1 border border-gray-300 p-2 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="e.g. 123456789012"
             />
-            <button
-              onClick={handleNext}
-              className="bg-[#01217e] text-white px-4 py-2 rounded-lg hover:bg-[#fcbe03] transition"
-            >
+            <button onClick={handleNext}
+                className="bg-[#01217e] text-white px-5 py-2 rounded-lg hover:bg-[#fcbe03] transition duration-300">
               Next
             </button>
           </div>
+  
           {error && <p className="text-red-500 text-center mt-2">{error}</p>}
-          <div className="text-center mt-2">
-            <button
-              onClick={handleNoConsumer}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              I don’t have consumer number
+  
+          <div className="text-center mt-3">
+            <button onClick={handleNoConsumer} className="text-sm text-blue-600 hover:underline">
+              I don’t have a consumer number
             </button>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {submissions.map((submission) => (
-            <div
-              key={submission.id}
-              className="bg-white shadow-md border border-gray-300 rounded-lg p-4"
-            >
-              <p className="text-gray-800 font-medium mb-1">
-                {submission.message || "Submitted request"}
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                Submitted on: {submission.submittedAt}
-              </p>
-
-              {submission.formData && (
-                <div className="text-sm text-gray-700 mt-2 space-y-1">
-                  <p><strong>Name:</strong> {submission.formData.applicantName}</p>
-                  <p><strong>District:</strong> {submission.formData.district}</p>
-                  <p><strong>Subdivision:</strong> {submission.formData.subdivision}</p>
-                  <p><strong>Address:</strong> {submission.formData.address}</p>
-                  <p><strong>Purpose:</strong> {submission.formData.usageType}</p>
-                  <p><strong>Reason:</strong> {submission.formData.reason}</p>
-                  <p><strong>Preferred Date:</strong> {submission.formData.preferredDate}</p>
-                </div>
-              )}
-
-              <span
-                className={`inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full ${
-                  submission.status === "Pending"
-                    ? "bg-yellow-200 text-yellow-800"
-                    : submission.status === "Accepted"
-                    ? "bg-green-200 text-green-800"
-                    : submission.status === "Rejected"
-                    ? "bg-red-100 text-red-800 border border-red-300"
-                    : "bg-red-200 text-red-800"
-                }`}
+  
+        {/* Submissions Grid */}
+        {submissions.length > 0 && (
+          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {submissions.map((submission) => (
+              <div
+                key={submission.id}
+                className="bg-white shadow-sm border border-gray-200 rounded-xl p-4 hover:shadow-md transition"
               >
-                {submission.status}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+                <p className="text-gray-800 font-medium mb-1">
+                  {submission.message || "Submitted request"}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  Submitted on: {submission.submittedAt}
+                </p>
+  
+                {submission.formData && (
+                  <div className="text-sm text-gray-700 mt-2 space-y-1">
+                    <p><strong>Name:</strong> {submission.formData.applicantName}</p>
+                    <p><strong>District:</strong> {submission.formData.district}</p>
+                    <p><strong>Subdivision:</strong> {submission.formData.subdivision}</p>
+                    <p><strong>Address:</strong> {submission.formData.address}</p>
+                    <p><strong>Purpose:</strong> {submission.formData.usageType}</p>
+                    <p><strong>Reason:</strong> {submission.formData.reason}</p>
+                    <p><strong>Preferred Date:</strong> {submission.formData.preferredDate}</p>
+                  </div>
+                )}
+
+                <span
+                  className={`inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full ${
+                    submission.status === "Pending"
+                      ? "bg-yellow-200 text-yellow-800"
+                      : submission.status === "Accepted"
+                      ? "bg-green-200 text-green-800"
+                      : "bg-red-100 text-red-800 border border-red-300"
+                  }`}
+                >
+                  {submission.status}
+               </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

@@ -4,7 +4,7 @@ export default function NewApplication() {
   return (
     <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="customer" />
-      <main className="flex-1 p-8">
+      <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
         <h1 className="text-2xl font-bold">Welcome to Apply for new electricity connection </h1>
       </main>
     </div>
