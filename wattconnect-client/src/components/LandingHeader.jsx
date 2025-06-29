@@ -3,14 +3,11 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
-    <header className="bg-[#01217e] shadow-md sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-[#01217e] to-transparent backdrop-blur-sm shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/*         Logo Section          */}
-          <Link
-            to="/"
-            className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
-          >
+          {/* Logo Section */}
+          <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
               <Zap className="w-6 h-6 text-white" />
             </div>
@@ -20,7 +17,7 @@ const Header = () => {
             </div>
           </Link>
 
-          {/*       Buttons        */}
+          {/* Buttons */}
           <div className="flex items-center space-x-4">
             <Link
               to="/login"

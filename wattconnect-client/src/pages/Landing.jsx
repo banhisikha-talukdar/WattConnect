@@ -1,5 +1,6 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
+import LandingHeader from '../components/LandingHeader';
+import heroImage from '../assets/hero-img2.jpeg';
 import { Zap, BarChart3, Shield, Users, TrendingDown, Lightbulb, ArrowRight } from 'lucide-react';
 
 const Landing = () => {
@@ -25,44 +26,55 @@ const Landing = () => {
       description: 'Your data is protected with enterprise-grade security and reliable infrastructure.',
     },
   ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-indigo-100">
-      <section className="relative px-4 sm:px-6 lg:px-8 py-20 lg:py-32 bg-[url('./assets/hero-img2.jpeg')] bg-cover bg-center bg-no-repeat">
-        {/* Bottom Gradient Fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#b0daf2] pointer-events-none z-0" />
-
-        {/* Main Content */}
-        <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-400 to-[#2550da] rounded-3xl shadow-2xl">
-              <Zap className="w-10 h-10 text-white" />
-            </div>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-blue-700 mb-4">
-            Watt Connect
-            <span className="block text-[#c9d7fe] text-shadow-lg/30">Smart Energy Management Made Simple</span>
-          </h1>
-
-          <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed">
-            Welcome to APDCL's Smart Energy Saver platform. Monitor, analyze, and optimize your electricity consumption with our intelligent dashboard.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              to="/signup"
-              className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-400 to-[#2550da] hover:from-blue-300 hover:to-blue-400 hover:text-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              Get Started Today
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
+      <div className="relative min-h-screen">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img src={heroImage} alt="Hero Background"  className="w-full h-full object-cover"/>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-blue-100/70" />
         </div>
-      </section>
 
-      {/*             Cards Section            */}
+        {/* Header and Hero Content on Top */}
+        <div className="relative z-10">
+          <LandingHeader />
+
+          {/* Hero Content */}
+          <section className="px-4 sm:px-6 lg:px-8 pt-32 pb-20 text-center">
+            <div className="flex items-center justify-center mb-8">
+              <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-400 to-[#2550da] rounded-3xl shadow-2xl">
+                <Zap className="w-10 h-10 text-white" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-blue-700 mb-4">
+              Watt Connect
+              <span className="block text-[#c9d7fe] text-shadow-lg/30">
+                Smart Energy Management Made Simple
+              </span>
+            </h1>
+
+            <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed">
+              Welcome to APDCL's Smart Energy Saver platform. Monitor, analyze, and optimize your electricity consumption with our intelligent dashboard.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                to="/signup"
+                className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-400 to-[#2550da] hover:from-blue-300 hover:to-blue-400 hover:text-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                Get Started Today
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Cards Section */}
       <section className="py-20 bg-gradient-to-b from-[#b0daf2] to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Why Choose Watt Connect?
@@ -84,16 +96,14 @@ const Landing = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/*             Last Section          */}
+      {/* Final CTA Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
@@ -104,13 +114,19 @@ const Landing = () => {
               Join thousands of customers who are already saving money and reducing their environmental impact with our smart energy management platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup" className="inline-flex items-center px-8 py-4 text-lg font-semibold text-[#031517] bg-white hover:bg-blue-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Link
+                to="/signup"
+                className="inline-flex items-center px-8 py-4 text-lg font-semibold text-[#031517] bg-white hover:bg-blue-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
                 <Users className="mr-2 w-5 h-5" />
                 Create Free Account
               </Link>
-              <Link to="/login" className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-br from-blue-400 to-[#01217e] hover:bg-blue-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Link
+                to="/login"
+                className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-br from-blue-400 to-[#01217e] hover:bg-blue-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
                 Access Your Dashboard
-              </Link> 
+              </Link>
             </div>
           </div>
         </div>
@@ -119,4 +135,4 @@ const Landing = () => {
   );
 };
 
-export default Landing
+export default Landing;
