@@ -1,28 +1,27 @@
 const Usage = require("../models/Usage");
 
 exports.logUsage = async (req, res) => {
-  const { month, year, unitsUsed, usageType } = req.body;
+  const { unitsUsed, usageType, date } = req.body;
 
-  if (!month || !year || !unitsUsed || !usageType) {
-    return res.status(400).json({ error: "All fields are required" });
+  if (!unitsUsed || !usageType || !date) {
+    return res.status(400).json({ error: "All fields (unitsUsed, usageType, date) are required." });
   }
 
   if (!['domestic', 'commercial'].includes(usageType)) {
-    return res.status(400).json({ error: "Invalid usage type" });
+    return res.status(400).json({ error: "Invalid usage type." });
   }
 
   try {
     const usage = new Usage({
       userId: req.user.userId,
       username: req.user.username,
-      month,
-      year,
       unitsUsed,
-      usageType
+      usageType,
+      date: new Date(date),
     });
 
     await usage.save();
-    res.status(201).json({ message: "Usage logged successfully" });
+    res.status(201).json({ message: "Usage logged successfully." });
   } catch (err) {
     console.error("❌ Usage logging error:", err);
     res.status(500).json({ error: "Server error" });
@@ -31,7 +30,7 @@ exports.logUsage = async (req, res) => {
 
 exports.getUsage = async (req, res) => {
   try {
-    const usageData = await Usage.find({ userId: req.user.userId }).sort({ createdAt: 1 });
+    const usageData = await Usage.find({ userId: req.user.userId }).sort({ date: 1 });
     res.json(usageData);
   } catch (err) {
     console.error("❌ Fetch usage error:", err);

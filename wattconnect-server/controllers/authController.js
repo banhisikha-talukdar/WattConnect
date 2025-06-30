@@ -5,19 +5,29 @@ const jwt = require('jsonwebtoken');
 // Register (Signup)
 exports.register = async (req, res) => {
   try {
-    const { name, username, email, password, role } = req.body;
+    const {
+      name,
+      username,
+      email,
+      password,
+      role,
+      isExistingCustomer,
+      consumerNumber,
+    } = req.body;
 
     console.log("📝 Signup attempt for:", username);
 
     // Basic validations
     if (!name || !username || !email || !password) {
-      console.log("❌ Missing fields during signup");
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
     if (password.length < 6) {
-      console.log("❌ Weak password during signup");
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    if (isExistingCustomer && (!consumerNumber || !/^\d{12}$/.test(consumerNumber))) {
+      return res.status(400).json({ message: 'Valid 12-digit consumer number is required' });
     }
 
     const existingUser = await User.findOne({
@@ -25,7 +35,6 @@ exports.register = async (req, res) => {
     });
 
     if (existingUser) {
-      console.log("⚠️ User already exists:", existingUser.email || existingUser.username);
       return res.status(400).json({ message: 'Email or username already in use' });
     }
 
@@ -36,7 +45,8 @@ exports.register = async (req, res) => {
       username: username.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: role === 'admin' ? 'admin' : 'customer'
+      role: role === 'admin' ? 'admin' : 'customer',
+      consumerNumber: isExistingCustomer ? consumerNumber : null,
     });
 
     await user.save();
@@ -57,7 +67,8 @@ exports.register = async (req, res) => {
         name: user.name,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        consumerNumber: user.consumerNumber || null,
       }
     });
   } catch (err) {
@@ -77,19 +88,16 @@ exports.login = async (req, res) => {
     console.log("🔐 Login attempt for:", email);
 
     if (!email || !password) {
-      console.log("❌ Missing login fields");
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      console.log("❌ User not found:", email);
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("❌ Invalid password for:", email);
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
@@ -109,7 +117,8 @@ exports.login = async (req, res) => {
         name: user.name,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        consumerNumber: user.consumerNumber || null,
       }
     });
   } catch (err) {
@@ -121,19 +130,20 @@ exports.login = async (req, res) => {
   }
 };
 
-
-// Profile ME
+// Get profile (/me)
 exports.getMe = async (req, res) => {
   console.log("✅ /me route hit. Decoded token:", req.user);
   try {
-    const user = await User.findById(req.user.userId).select('username email');
+    const user = await User.findById(req.user.userId).select('username email role consumerNumber');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     res.json({
       username: user.username,
-      email: user.email
+      email: user.email,
+      role: user.role,
+      consumerNumber: user.consumerNumber || null,
     });
   } catch (err) {
     console.error('❌ Error in getMe controller:', err);
@@ -141,7 +151,7 @@ exports.getMe = async (req, res) => {
   }
 };
 
-// Profile Update
+// Update profile
 exports.updateProfile = async (req, res) => {
   console.log("🔧 Update profile attempt by:", req.user);
   try {
