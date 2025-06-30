@@ -6,7 +6,7 @@ const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/auth');
 const usageRoutes = require('./routes/usage');
-//const applicationRoutes = require('./routes/application');
+const newConnectionRoute = require("./routes/newConnection");
 const tariffRoutes = require("./routes/tariff");
 const scheduleRoutes = require('./routes/schedule');
 
@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use('/api/auth', authRoutes);
 app.use('/api/usage', usageRoutes);
-//app.use('/api/application', applicationRoutes);
+app.use("/api/new-connection", newConnectionRoute);
 app.use("/api/tariffs", tariffRoutes);
 app.use('/api/schedule', scheduleRoutes);
 
