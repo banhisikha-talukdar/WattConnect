@@ -34,18 +34,18 @@ function App() {
 
           <Route path="/customer/dashboard" element={<CustomerDashboard />}/>
           <Route path="/customer/add" element={<AddEntry />} />
-          <Route path="/customer/new_application" element={<NewApplication />}/>
+          <Route path="/customer/new-application" element={<NewApplication />}/>
           <Route path="/customer/tips-insights" element={<TipsnInsights />}/>
-          <Route path="/customer/my_engineer_scheduling" element={<EngineerSchedule />} />
-          <Route path="/customer/my_meter_scheduling" element={<MeterSchedule />} />
-          <Route path="/customer/schedule_my_engineer_form" element={<ScheduleMyEngineerForm />} />
-          <Route path="/customer/schedule_my_meter_form" element={<ScheduleMyMeterForm />} />
+          <Route path="/customer/my-engineer-scheduling" element={<EngineerSchedule />} />
+          <Route path="/customer/my-meter-scheduling" element={<MeterSchedule />} />
+          <Route path="/customer/schedule-my-engineer_form" element={<ScheduleMyEngineerForm />} />
+          <Route path="/customer/schedule-my-meter-form" element={<ScheduleMyMeterForm />} />
           <Route path="/customer/profile" element={<MyProfile />}/>
 
           <Route path="/admin/home" element={<Home />} />
           <Route path="/admin/applications" element={<Applications />} />
-          <Route path="/admin/engineer_scheduling" element={<EngineerScheduling />} />
-          <Route path="/admin/meter_scheduling" element={<MeterScheduling />} />
+          <Route path="/admin/engineer-scheduling" element={<EngineerScheduling />} />
+          <Route path="/admin/meter-scheduling" element={<MeterScheduling />} />
         </Routes>
         </div>
         {/* Always show footer */}

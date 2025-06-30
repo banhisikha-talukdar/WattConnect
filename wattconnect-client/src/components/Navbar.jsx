@@ -23,14 +23,14 @@ export default function Navbar({ type }) {
   const links = type === 'admin' ? [
     { name: 'Home', icon: <Home size={20} />, path: '/admin/home' },
     { name: 'Applications', icon: <FileText size={20} />, path: '/admin/applications' },
-    { name: 'Engineer Scheduling', icon: <Wrench size={20} />, path: '/admin/engineer_scheduling' },
-    { name: 'Meter Scheduling', icon: <CalendarClock size={20} />, path: '/admin/meter_scheduling' },
+    { name: 'Engineer Scheduling', icon: <Wrench size={20} />, path: '/admin/engineer-scheduling' },
+    { name: 'Meter Scheduling', icon: <CalendarClock size={20} />, path: '/admin/meter-scheduling' },
   ] : [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/customer/dashboard' },
-    { name: 'New Application', icon: <FileText size={20} />, path: '/customer/new_application' },
+    { name: 'New Application', icon: <FileText size={20} />, path: '/customer/new-application' },
     { name: 'Tips & Insights', icon: <FileBarChart size={20} />, path: '/customer/tips-insights' },
-    { name: 'Schedule my engineer', icon: <Wrench size={20} />, path: '/customer/my_engineer_scheduling' },
-    { name: 'Schedule my meter', icon: <CalendarClock size={20} />, path: '/customer/my_meter_scheduling' },
+    { name: 'Schedule my engineer', icon: <Wrench size={20} />, path: '/customer/my-engineer-scheduling' },
+    { name: 'Schedule my meter', icon: <CalendarClock size={20} />, path: '/customer/my-meter-scheduling' },
     { name: 'Profile', icon: <User size={20} />, path: '/customer/profile' },
   ];
 
