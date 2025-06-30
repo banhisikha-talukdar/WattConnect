@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,13 +16,13 @@ export default function Home() {
       title: "Engineer Scheduling",
       icon: "👷‍♂️",
       description: "Manage requests for engineer visits from customers based on their preferred schedule.",
-      action: () => navigate("/admin/engineer_scheduling"),
+      action: () => navigate("/admin/engineer-scheduling"),
     },
     {
       title: "Meter Scheduling",
       icon: "🔌",
       description: "Schedule and oversee meter installation visits requested by customers.",
-      action: () => navigate("/admin/meter_scheduling"),
+      action: () => navigate("/admin/meter-scheduling"),
     },
   ];
 
