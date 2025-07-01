@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
+import NewApplicationForm from './components/NewApplicationForm';
 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -35,6 +36,7 @@ function App() {
           <Route path="/customer/dashboard" element={<CustomerDashboard />}/>
           <Route path="/customer/add" element={<AddEntry />} />
           <Route path="/customer/new-application" element={<NewApplication />}/>
+          <Route path="/customer/new-connection-form" element={<NewApplicationForm />} />
           <Route path="/customer/tips-insights" element={<TipsnInsights />}/>
           <Route path="/customer/my-engineer-scheduling" element={<EngineerSchedule />} />
           <Route path="/customer/my-meter-scheduling" element={<MeterSchedule />} />

@@ -1,12 +1,5 @@
 import Navbar from '../../components/Navbar';
-
-const assamDistricts = [
-  "Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang",
-  "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat",
-  "Kamrup", "Kamrup Metropolitan", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur",
-  "Majuli", "Morigaon", "Nagaon", "Nalbari", "Dima Hasao", "Sivasagar", "Sonitpur", "South Salmara-Mankachar",
-  "Tinsukia", "Udalguri", "West Karbi Anglong", "Tamulpur", "Bajali"
-];
+import { Link } from 'react-router-dom';
 
 export default function NewApplication() {
   return (
@@ -31,6 +24,14 @@ export default function NewApplication() {
         <p className="text-sm text-gray-600 mt-4">
           Note: All uploaded documents must be self-attested. Originals may be requested during inspection.
         </p>
+        <div className="mt-6">
+          <Link
+            to="/customer/new-connection-form" 
+            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+          >
+            Apply for New Connection
+          </Link>
+        </div>
       </main>
     </div>
   );
