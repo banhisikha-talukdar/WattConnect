@@ -74,7 +74,24 @@ export default function UsageChart() {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setUsageData(res.data);
+        const enriched = res.data.map((entry) => {
+          const dateObj = new Date(entry.date);
+          const year = dateObj.getFullYear();
+          const month = months[dateObj.getMonth()];
+          const dd = String(dateObj.getDate()).padStart(2, "0");
+          const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+          const yyyy = dateObj.getFullYear();
+          const formattedDate = `${dd}-${mm}-${yyyy}`;
+
+          return {
+            ...entry,
+            year,
+            month,
+            formattedDate,
+          };
+        });
+
+        setUsageData(enriched);
         setLoading(false);
       })
       .catch(() => {
@@ -83,24 +100,27 @@ export default function UsageChart() {
       });
   }, [token]);
 
-  const years = Array.from(new Set(usageData.map((entry) => entry.year)));
+  const years = Array.from(new Set(usageData.map((entry) => entry.year))).sort();
+
   useEffect(() => {
     if (years.length > 0 && !selectedYear) {
-      setSelectedYear(years[0]);
+      setSelectedYear(String(years[0]));
     }
-  }, [years]);
+  }, [years, selectedYear]);
 
   const filteredData = usageData.filter(
-    (entry) => entry.year === selectedYear && entry.month === selectedMonth
+    (entry) =>
+      String(entry.year) === String(selectedYear) &&
+      entry.month === selectedMonth
   );
 
   const allDates = getAllDaysInMonth(Number(selectedYear), selectedMonth);
   const groupedData = {};
-  filteredData.forEach(({ date, unitsUsed, usageType }) => {
-    if (!groupedData[date]) {
-      groupedData[date] = { domestic: 0, commercial: 0 };
+  filteredData.forEach(({ formattedDate, unitsUsed, usageType }) => {
+    if (!groupedData[formattedDate]) {
+      groupedData[formattedDate] = { domestic: 0, commercial: 0 };
     }
-    groupedData[date][usageType.toLowerCase()] = unitsUsed;
+    groupedData[formattedDate][usageType.toLowerCase()] = unitsUsed;
   });
 
   const domesticData = allDates.map((date) => groupedData[date]?.domestic || 0);
@@ -113,7 +133,7 @@ export default function UsageChart() {
       label: "Domestic",
       data: domesticData,
       borderColor: "#3B82F6",
-      tension: 0,
+      tension: 0.3,
       fill: false,
     });
   }
@@ -122,15 +142,12 @@ export default function UsageChart() {
       label: "Commercial",
       data: commercialData,
       borderColor: "#F97316",
-      tension: 0,
+      tension: 0.3,
       fill: false,
     });
   }
 
-  const chartData = {
-    labels,
-    datasets,
-  };
+  const chartData = { labels, datasets };
 
   const options = {
     responsive: true,
@@ -159,8 +176,8 @@ export default function UsageChart() {
           onChange={(e) => setSelectedYear(e.target.value)}
           className="border border-gray-300 px-4 py-2 rounded"
         >
-          {years.map((year) => (
-            <option key={year} value={year}>{year}</option>
+          {years.map((year, index) => (
+            <option key={`year-${index}`} value={year}>{year}</option>
           ))}
         </select>
 
@@ -169,8 +186,8 @@ export default function UsageChart() {
           onChange={(e) => setSelectedMonth(e.target.value)}
           className="border border-gray-300 px-4 py-2 rounded"
         >
-          {months.map((month) => (
-            <option key={month} value={month}>{month}</option>
+          {months.map((month, index) => (
+            <option key={`month-${index}`} value={month}>{month}</option>
           ))}
         </select>
       </div>
