@@ -15,46 +15,51 @@ import { AuthContext } from "../context/AuthContext";
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Legend, Tooltip, Title);
 
-const monthOrder = [
+const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 
-const processDataByYear = (data) => {
-  const yearlyData = {};
+function formatDateLabel(dateStr) {
+  const [dd, mm] = dateStr.split("-");
+  const day = parseInt(dd);
+  const monthShort = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ][parseInt(mm) - 1];
 
-  data.forEach((entry) => {
-    const { year, month, usageType, unitsUsed } = entry;
+  const suffix = (d) =>
+    d === 1 || d === 21 || d === 31
+      ? "st"
+      : d === 2 || d === 22
+      ? "nd"
+      : d === 3 || d === 23
+      ? "rd"
+      : "th";
 
-    if (!yearlyData[year]) {
-      yearlyData[year] = {
-        labels: monthOrder,
-        domestic: Array(12).fill(0),
-        commercial: Array(12).fill(0),
-        hasDomestic: false,
-        hasCommercial: false,
-      };
-    }
+  return `${day}${suffix(day)} ${monthShort}`;
+}
 
-    const monthIndex = monthOrder.indexOf(month);
-    if (usageType.toLowerCase() === "domestic") {
-      yearlyData[year].domestic[monthIndex] += unitsUsed;
-      yearlyData[year].hasDomestic = true;
-    } else if (usageType.toLowerCase() === "commercial") {
-      yearlyData[year].commercial[monthIndex] += unitsUsed;
-      yearlyData[year].hasCommercial = true;
-    }
-  });
-
-  return yearlyData;
-};
+function getAllDaysInMonth(year, monthName) {
+  const month = months.indexOf(monthName);
+  const date = new Date(year, month, 1);
+  const dates = [];
+  while (date.getMonth() === month) {
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(month + 1).padStart(2, "0");
+    const y = date.getFullYear();
+    dates.push(`${d}-${m}-${y}`);
+    date.setDate(date.getDate() + 1);
+  }
+  return dates;
+}
 
 export default function UsageChart() {
   const [usageData, setUsageData] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("January");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -72,112 +77,108 @@ export default function UsageChart() {
         setUsageData(res.data);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setError("Failed to load usage data.");
         setLoading(false);
       });
   }, [token]);
 
-  const yearlyProcessed = processDataByYear(usageData);
-  const yearKeys = Object.keys(yearlyProcessed);
-
+  const years = Array.from(new Set(usageData.map((entry) => entry.year)));
   useEffect(() => {
-    if (yearKeys.length > 0 && !selectedYear) {
-      setSelectedYear(yearKeys[0]); // Default to first year
+    if (years.length > 0 && !selectedYear) {
+      setSelectedYear(years[0]);
     }
-  }, [yearKeys]);
+  }, [years]);
 
-  if (loading) {
-    return <p className="text-center text-gray-500 py-4">Loading usage data...</p>;
-  }
+  const filteredData = usageData.filter(
+    (entry) => entry.year === selectedYear && entry.month === selectedMonth
+  );
 
-  if (error) {
-    return <p className="text-center text-red-500 py-4">{error}</p>;
-  }
+  const allDates = getAllDaysInMonth(Number(selectedYear), selectedMonth);
+  const groupedData = {};
+  filteredData.forEach(({ date, unitsUsed, usageType }) => {
+    if (!groupedData[date]) {
+      groupedData[date] = { domestic: 0, commercial: 0 };
+    }
+    groupedData[date][usageType.toLowerCase()] = unitsUsed;
+  });
 
-  if (yearKeys.length === 0) {
-    return <p className="text-center text-gray-500 py-4">No usage data available.</p>;
-  }
-
-  const selectedData = yearlyProcessed[selectedYear];
+  const domesticData = allDates.map((date) => groupedData[date]?.domestic || 0);
+  const commercialData = allDates.map((date) => groupedData[date]?.commercial || 0);
+  const labels = allDates.map(formatDateLabel);
 
   const datasets = [];
-  if (selectedData?.hasDomestic) {
+  if (domesticData.some((val) => val !== 0)) {
     datasets.push({
-      label: "Domestic Usage",
-      data: selectedData.domestic,
+      label: "Domestic",
+      data: domesticData,
       borderColor: "#3B82F6",
-      backgroundColor: "#3B82F6",
-      tension: 0.4,
-      pointBackgroundColor: "#3B82F6",
+      tension: 0,
+      fill: false,
     });
   }
-  if (selectedData?.hasCommercial) {
+  if (commercialData.some((val) => val !== 0)) {
     datasets.push({
-      label: "Commercial Usage",
-      data: selectedData.commercial,
+      label: "Commercial",
+      data: commercialData,
       borderColor: "#F97316",
-      backgroundColor: "#F97316",
-      tension: 0.4,
-      pointBackgroundColor: "#F97316",
+      tension: 0,
+      fill: false,
     });
   }
 
-  const baseOptions = {
+  const chartData = {
+    labels,
+    datasets,
+  };
+
+  const options = {
     responsive: true,
     plugins: {
-      legend: {
-        position: "top",
-        labels: { color: "#333" },
-      },
-      title: {
-        display: true,
-        text: `Monthly Usage for ${selectedYear}`,
-      },
+      legend: { position: "top" },
+      tooltip: { mode: "index", intersect: false },
     },
     scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { color: "#333" },
-        title: { display: true, text: "Units" },
-      },
-      x: {
-        ticks: { color: "#333" },
-      },
+      x: { title: { display: true, text: "Date" } },
+      y: { beginAtZero: true, title: { display: true, text: "Units" } },
     },
   };
 
+  if (loading) return <p className="text-center py-4 text-gray-500">Loading...</p>;
+  if (error) return <p className="text-center py-4 text-red-500">{error}</p>;
+
   return (
-    <div className="space-y-6 w-full max-w-4xl mx-auto">
-      <div className="mb-4">
-        <label htmlFor="year" className="block text-gray-700 font-medium mb-2">Select Year</label>
+    <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-[#226c82] text-center">
+        Monthly Usage Chart
+      </h2>
+
+      <div className="flex justify-center gap-4 mb-6">
         <select
-          id="year"
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
-          className="border border-gray-300 rounded px-4 py-2 text-gray-800"
+          className="border border-gray-300 px-4 py-2 rounded"
         >
-          {yearKeys.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
+          {years.map((year) => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="border border-gray-300 px-4 py-2 rounded"
+        >
+          {months.map((month) => (
+            <option key={month} value={month}>{month}</option>
           ))}
         </select>
       </div>
 
       {datasets.length > 0 ? (
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <Line
-            data={{
-              labels: selectedData.labels,
-              datasets,
-            }}
-            options={baseOptions}
-            height={300}
-          />
-        </div>
+        <Line data={chartData} options={options} />
       ) : (
-        <p className="text-center text-gray-500 py-4">No usage data available for {selectedYear}.</p>
+        <p className="text-center text-gray-500">No usage data for selected month.</p>
       )}
     </div>
   );

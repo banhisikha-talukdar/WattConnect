@@ -7,15 +7,14 @@ export default function SubmitUsageForm() {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const [month, setMonth] = useState("");
-  const [year, setYear] = useState("");
+  const [date, setDate] = useState("");
   const [unitsUsed, setUnitsUsed] = useState("");
   const [usageType, setUsageType] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!month || !year || !unitsUsed || !usageType) {
+    if (!date || !unitsUsed || !usageType) {
       alert("Please fill all fields");
       return;
     }
@@ -23,7 +22,7 @@ export default function SubmitUsageForm() {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/usage",
-        { month, year: Number(year), unitsUsed: Number(unitsUsed), usageType },
+        { date, unitsUsed: Number(unitsUsed), usageType },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -42,34 +41,14 @@ export default function SubmitUsageForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white shadow-md p-8 rounded-2xl w-full max-w-md flex flex-col gap-4"
-    >
+      className="bg-white shadow-md p-8 rounded-2xl w-full max-w-md flex flex-col gap-4">
       <h2 className="text-2xl font-bold text-center text-[#226c82]">Submit Usage</h2>
 
-      <select
-        value={month}
-        onChange={(e) => setMonth(e.target.value)}
-        required
-        className="border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#226c82]"
-      >
-        <option value="">Select Month</option>
-        {[
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
-        ].map((m) => (
-          <option key={m} value={m}>
-            {m}
-          </option>
-        ))}
-      </select>
-
       <input
-        type="number"
-        placeholder="Year (e.g. 2025)"
-        value={year}
-        onChange={(e) => setYear(e.target.value)}
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
         required
-        min="2020"
         className="border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#226c82]"
       />
 
