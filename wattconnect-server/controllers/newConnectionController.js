@@ -1,6 +1,6 @@
 const NewConnection = require("../models/NewConnection");
 
-exports.submitApplication = async (req, res) => {
+const submitApplication = async (req, res) => {
   try {
     const {
       district,
@@ -25,26 +25,39 @@ exports.submitApplication = async (req, res) => {
         addressProof: uploads.addressProof?.[0]?.path || "",
         legalOccupationProof: uploads.legalOccupationProof?.[0]?.path || "",
         testReport: uploads.testReport?.[0]?.path || "",
-        photo: uploads.photo?.[0]?.path || "",
-        affidavit: uploads.affidavit?.[0]?.path || "",
+        photo: uploads.passportPhoto?.[0]?.path || "",
+        affidavit: uploads.affidavitOrNOC?.[0]?.path || "",
+        agreementForm: uploads.agreementForm?.[0]?.path || "",
+        htAdditionalDocs: uploads.htAdditionalDocs?.[0]?.path || "",
       },
-      submittedBy: req.user.id,
+      userId: req.user.id,
     });
 
     await newForm.save();
-    res.status(201).json({ message: "Application submitted successfully", data: newForm });
+    res.status(201).json({
+      message: "Application submitted successfully",
+      data: newForm,
+    });
   } catch (error) {
     console.error("❌ Error submitting new connection:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-exports.getApplications = async (req, res) => {
+const getApplications = async (req, res) => {
   try {
-    const applications = await NewApplication.find().populate("userId", "name email");
+    const applications = await NewConnection.find().populate(
+      "userId",
+      "name email"
+    );
     res.json(applications);
   } catch (err) {
     console.error("Error fetching applications:", err);
     res.status(500).json({ error: "Failed to fetch applications" });
   }
+};
+
+module.exports = {
+  submitApplication,
+  getApplications,
 };
