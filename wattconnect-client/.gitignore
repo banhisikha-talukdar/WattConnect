@@ -24,4 +24,3 @@ dist-ssr
 *.sw?
 # Ignore dummy data
 src/assets/dummydata.js
-src/assets/tarriffdata.js
