@@ -31,7 +31,7 @@ const newApplicationSchema = new mongoose.Schema({
     affidavitOrNOC: String,
     testReport: String,
     agreementForm: String,
-    htAdditionalDocs: String, // optional
+    htAdditionalDocs: String, 
   },
 
   submittedAt: { type: Date, default: Date.now },

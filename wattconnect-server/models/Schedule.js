@@ -10,6 +10,8 @@ const scheduleSchema = new mongoose.Schema({
   preferredDate: Date,
   usageType: { type: String, enum: ['domestic', 'commercial'] },
   reason: String,
+  status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: 'Pending' },
+  assignedFME: { type: mongoose.Schema.Types.ObjectId, ref: 'FME', default: null },
   submittedAt: { type: Date, default: Date.now }
 });
 

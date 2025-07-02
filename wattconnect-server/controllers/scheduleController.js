@@ -1,4 +1,5 @@
 const Schedule = require('../models/Schedule');
+const FME = require('../models/FME');
 
 const isValidConsumerNumber = (number) => /^\d{12}$/.test(number);
 
@@ -91,10 +92,69 @@ exports.getSchedules = async (req, res) => {
     if (type) query.formType = type;
     if (consumerNumber) query.consumerNumber = consumerNumber;
 
-    const schedules = await Schedule.find(query).sort({ preferredDate: 1 });
+    const schedules = await Schedule.find(query)
+      .populate('assignedFME', 'name employeeId contactNumber')
+      .sort({ preferredDate: 1 });
+
     res.status(200).json(schedules);
   } catch (err) {
     console.error('❌ Fetch schedule error:', err);
     res.status(500).json({ error: 'Server error while fetching schedules' });
+  }
+};
+
+exports.acceptSchedule = async (req, res) => {
+  try {
+    const schedule = await Schedule.findByIdAndUpdate(
+      req.params.id,
+      { status: 'Accepted' },
+      { new: true }
+    );
+    if (!schedule) return res.status(404).json({ error: 'Schedule not found' });
+
+    res.json({ message: 'Schedule accepted', schedule });
+  } catch (err) {
+    console.error('❌ Accept error:', err);
+    res.status(500).json({ error: 'Server error accepting schedule' });
+  }
+};
+
+exports.rejectSchedule = async (req, res) => {
+  try {
+    const schedule = await Schedule.findByIdAndUpdate(
+      req.params.id,
+      { status: 'Rejected' },
+      { new: true }
+    );
+    if (!schedule) return res.status(404).json({ error: 'Schedule not found' });
+
+    res.json({ message: 'Schedule rejected', schedule });
+  } catch (err) {
+    console.error('❌ Reject error:', err);
+    res.status(500).json({ error: 'Server error rejecting schedule' });
+  }
+};
+
+exports.assignFME = async (req, res) => {
+  const { fmeId } = req.body;
+
+  try {
+    const fme = await FME.findById(fmeId);
+    if (!fme) return res.status(404).json({ error: 'FME not found' });
+
+    const schedule = await Schedule.findByIdAndUpdate(
+      req.params.id,
+      { assignedFME: fmeId, status: 'Accepted' },
+      { new: true }
+    );
+    if (!schedule) return res.status(404).json({ error: 'Schedule not found' });
+
+    fme.assignedSchedules.push(schedule._id);
+    await fme.save();
+
+    res.json({ message: 'FME assigned to schedule', schedule });
+  } catch (err) {
+    console.error('❌ Assign FME error:', err);
+    res.status(500).json({ error: 'Server error assigning FME' });
   }
 };
