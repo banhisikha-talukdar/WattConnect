@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 # Ignore dummy data
 src/assets/dummydata.js
+# Ignore tariff data
+src/assets/tariffdata.js
