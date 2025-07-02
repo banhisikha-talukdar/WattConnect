@@ -22,7 +22,7 @@ export default function SubmitUsageForm() {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/usage",
-        { date, unitsUsed: Number(unitsUsed), usageType },
+        { date, unitsUsed: parseFloat(unitsUsed), usageType },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -41,7 +41,8 @@ export default function SubmitUsageForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white shadow-md p-8 rounded-2xl w-full max-w-md flex flex-col gap-4">
+      className="bg-white shadow-md p-8 rounded-2xl w-full max-w-md flex flex-col gap-4"
+    >
       <h2 className="text-2xl font-bold text-center text-[#226c82]">Submit Usage</h2>
 
       <input
@@ -59,6 +60,7 @@ export default function SubmitUsageForm() {
         onChange={(e) => setUnitsUsed(e.target.value)}
         required
         min="0"
+        step="any"
         className="border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#226c82]"
       />
 

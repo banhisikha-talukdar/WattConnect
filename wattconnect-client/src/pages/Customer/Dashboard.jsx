@@ -2,6 +2,7 @@ import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import TariffChart from "../../components/TariffChart";
 import UsageChart from "../../components/UsageChart"; 
+import BillCalculator from "../../components/BillCalculator";
 
 const username = "Customer";
 
@@ -32,6 +33,12 @@ export default function CustomerDashboard() {
 
         {/* Charts Section */}
         <div className="max-w-5xl mx-auto space-y-10">
+          {/* Daily Bill Calculator */}
+            <h3 className="text-xl font-semibold text-gray-700 mb-4">
+              Daily Bill Estimator
+            </h3>
+            <BillCalculator />
+
           {/* Usage Chart */}
           <div className="bg-white p-6 rounded-2xl shadow-md">
             <h3 className="text-xl font-semibold text-gray-700 mb-4">
