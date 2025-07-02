@@ -1,129 +1,146 @@
-import { useEffect, useState } from 'react';
+// ✅ BillCalculator.jsx
+import { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
-export default function BillCalculator({ selectedYear, selectedMonth }) {
-  const [monthlyBill, setMonthlyBill] = useState(null);
+export default function BillCalculator({ selectedMonth, selectedYear }) {
+  const [totalUnits, setTotalUnits] = useState(0);
+  const [bill, setBill] = useState(null);
   const [details, setDetails] = useState(null);
-  const [error, setError] = useState(null);
-  const token = localStorage.getItem('token'); // Replace with actual token logic
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Step 1️⃣: Get user data (category, usageType)
-        const userRes = await axios.get('http://localhost:5000/api/auth/me', {
+        // 1️⃣ Get user info
+        const authRes = await axios.get('http://localhost:5000/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
+        const { _id: userId, category, usageType } = authRes.data;
 
-        const { _id: userId, category, usageType } = userRes.data;
-
-        // Step 2️⃣: Get usage data
+        // 2️⃣ Get usage data
         const usageRes = await axios.get('http://localhost:5000/api/usage', {
           headers: { Authorization: `Bearer ${token}` },
         });
+        const usageData = usageRes.data;
 
-        const currentMonth = [
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
-        ].indexOf(selectedMonth);
+        // 3️⃣ Filter for user + usageType
+        const userUsage = usageData.filter(
+          (entry) => entry.userId === userId && entry.usageType === usageType
+        );
 
-        const currentYear = Number(selectedYear);
-
-        const usageThisMonth = usageRes.data.filter((entry) => {
+        // 4️⃣ Filter for selected month & year
+        const filteredUsage = userUsage.filter((entry) => {
           const date = new Date(entry.date);
           return (
-            entry.customer === userId &&                // ✅ filter by customer ID
-            entry.usageType === usageType &&            // ✅ filter by usage type
-            date.getMonth() === currentMonth &&         // ✅ filter by month
-            date.getFullYear() === currentYear          // ✅ filter by year
+            date.getMonth() + 1 === selectedMonth &&
+            date.getFullYear() === selectedYear
           );
         });
 
-
-        // Step 3️⃣: Calculate total units used
-        const totalUnits = usageThisMonth.reduce((sum, entry) => sum + entry.unitsUsed, 0);
-
-        // Step 4️⃣: Get tariff data
-        const tariffRes = await axios.get('http://localhost:5000/api/tariffs');
-        const tariffData = tariffRes.data;
-
-        // Step 5️⃣: Match correct tariff slab
-        const matchingSlab = tariffData.find((item) => {
-          if (item.category !== category) return false;
-          if (item.unitRange) {
-            const [min, max] = item.unitRange;
-            return totalUnits >= min && totalUnits <= max;
-          }
-          return true; // if no unitRange, match only by category
+        // 5️⃣ Aggregate daily usage: create map
+        const unitsByDate = {};
+        filteredUsage.forEach((entry) => {
+          const date = new Date(entry.date);
+          const key = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+          unitsByDate[key] = (unitsByDate[key] || 0) + entry.unitsUsed;
         });
 
-        if (!matchingSlab) {
-          setMonthlyBill("❌ No matching tariff slab found.");
-          return;
+        // 6️⃣ Fill missing days, calculate total units
+        const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+        let total = 0;
+        for (let day = 1; day <= daysInMonth; day++) {
+          const key = `${String(day).padStart(2, '0')}-${String(selectedMonth).padStart(2, '0')}-${selectedYear}`;
+          total += unitsByDate[key] || 0;
         }
 
-        // Step 6️⃣: Extract data and compute bill
-        const {
-          subCategory,
-          fixedCharge = 0,
-          energyCharge = 0,
-          subsidyTargeted = 0,
-          subsidyTariff = 0,
-        } = matchingSlab;
+        setTotalUnits(total);
 
-        const totalSubsidy = subsidyTargeted + subsidyTariff;
-        const effectiveRate = energyCharge - totalSubsidy;
-        const bill = totalUnits * effectiveRate + fixedCharge;
-
-        setDetails({
-          subCategory: subCategory || "N/A",
-          fixedCharge,
-          energyCharge,
-          subsidyTargeted,
-          subsidyTariff,
-          totalSubsidy,
-          effectiveRate,
-          totalMonthlyUnits: totalUnits,
+        // 7️⃣ Get tariffs
+        const tariffRes = await axios.get('http://localhost:5000/api/tariffs', {
+          headers: { Authorization: `Bearer ${token}` },
         });
+        const tariffs = tariffRes.data;
 
-        setMonthlyBill(bill.toFixed(2));
+        // 8️⃣ Match category
+        const matchingTariffs = tariffs.filter(t => t.category === category);
+
+        let selectedTariff = null;
+
+        for (let t of matchingTariffs) {
+          if (t.unitRange && t.unitRange.length === 2) {
+            const [min, max] = t.unitRange;
+            if (total >= min && total <= max) {
+              selectedTariff = t;
+              break;
+            }
+          }
+        }
+
+        // Fallback to first match if no unitRange matched
+        if (!selectedTariff && matchingTariffs.length > 0) {
+          selectedTariff = matchingTariffs[0];
+        }
+
+        // 9️⃣ Calculate bill based on available data
+        let finalBill = null;
+        let formula = '';
+        if (selectedTariff) {
+          const {
+            fixedCharge,
+            effectiveRate,
+            energyCharge,
+            subsidyTariff,
+            subCategory,
+            type
+          } = selectedTariff;
+
+          const hasFixed = typeof fixedCharge === 'number';
+          const hasEffRate = typeof effectiveRate === 'number';
+          const hasEnergy = typeof energyCharge === 'number';
+
+          if (hasFixed && hasEffRate) {
+            finalBill = total * effectiveRate + fixedCharge;
+            formula = `TotalUnits * EffectiveRate + FixedCharge`;
+          } else if (hasFixed && hasEnergy) {
+            finalBill = total * energyCharge + fixedCharge;
+            formula = `TotalUnits * EnergyCharge + FixedCharge`;
+          } else {
+            console.warn("❌ Missing required tariff data for billing");
+          }
+
+          if (finalBill !== null) {
+            if (!isNaN(finalBill)) {
+              setBill(finalBill.toFixed(2));
+            }
+            setDetails({
+              subCategory,
+              type,
+              fixedCharge,
+              totalUnits: total,
+              rateUsed: hasEffRate ? effectiveRate : energyCharge,
+              formula,
+            });
+          }
+        }
       } catch (err) {
-        console.error(err);
-        setError("⚠️ Failed to fetch or process billing data.");
+        console.error("❌ Error calculating bill:", err);
       }
     };
 
     fetchData();
-  }, []);
+  }, [selectedMonth, selectedYear, token]);
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-md max-w-xl mx-auto mt-10">
-      <h2 className="text-xl font-bold mb-4">📊 Monthly Bill Estimate</h2>
-
-      {error && <p className="text-red-600">{error}</p>}
-
-      {details ? (
-        <>
-          <p><strong>Total Units Used:</strong> {details.totalMonthlyUnits} kWh</p>
-          <div className="mt-4 bg-gray-100 p-4 rounded">
-            <p className="text-lg font-semibold text-green-700">
-              💡 Estimated Current Bill: ₹{monthlyBill}
-            </p>
-
-            <div className="mt-3 text-sm space-y-1 text-gray-700">
-              <p><strong>Slab:</strong> {details.subCategory}</p>
-              <p><strong>Energy Charge:</strong> ₹{details.energyCharge}</p>
-              <p><strong>Subsidy Tariff:</strong> ₹{details.subsidyTariff}</p>
-              <p><strong>Subsidy Targeted:</strong> ₹{details.subsidyTargeted}</p>
-              <p><strong>Total Subsidy:</strong> ₹{details.totalSubsidy}</p>
-              <p><strong>Effective Rate:</strong> ₹{details.effectiveRate.toFixed(2)}</p>
-              <p><strong>Fixed Monthly Charge:</strong> ₹{details.fixedCharge}</p>
-            </div>
-          </div>
-        </>
-      ) : !error ? (
-        <p className="text-blue-600 mt-4">Fetching data and calculating bill...</p>
-      ) : null}
+    <div className="p-4 border rounded-xl bg-white shadow-md text-gray-800">
+      <h2 className="text-2xl font-bold mb-2">
+        📅 {String(selectedMonth).padStart(2, '0')}-{selectedYear}
+      </h2>
+      {bill && !isNaN(Number(bill)) ? (
+        <p className="text-xl text-green-700">💸 Bill: ₹<strong>{bill}</strong></p>
+      ) : (
+        <p className="text-red-600">⚠️ Bill could not be calculated.</p>
+      )}
     </div>
   );
 }
