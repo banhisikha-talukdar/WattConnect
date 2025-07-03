@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Navbar from '../../components/Navbar';
 import { AuthContext } from '../../context/AuthContext';
@@ -11,31 +11,32 @@ export default function EngineerScheduling() {
   const [showFmeDialog, setShowFmeDialog] = useState(false);
   const { token } = useContext(AuthContext);
 
+  
+  const fetchEngineerRequests = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/schedule', {
+        params: { type: 'engineer' },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      console.log("API response for engineer requests:", res.data);
+
+       const requestList = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data.data)
+        ? res.data.data
+        : [];
+
+      setRequests(requestList);
+    } catch (err) {
+      console.error("Error fetching engineer requests:", err);
+      setRequests([]);
+    }
+  };
+
   useEffect(() => {
-    const fetchEngineerRequests = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/schedule', {
-          params: { type: 'engineer' },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-
-        console.log("API response for engineer requests:", res.data);
-
-        const requestList = Array.isArray(res.data)
-          ? res.data
-          : Array.isArray(res.data.data)
-          ? res.data.data
-          : [];
-
-        setRequests(requestList);
-      } catch (err) {
-        console.error("Error fetching engineer requests:", err);
-        setRequests([]);
-      }
-    };
-
     if (token) fetchEngineerRequests();
   }, [token]);
 
@@ -93,11 +94,11 @@ export default function EngineerScheduling() {
         }
       );
 
-      // Remove from UI
       setRequests((prev) => prev.filter((r) => r._id !== id));
       setSelectedRequest(null);
       setSelectedFme(null);
       setShowFmeDialog(false);
+      // Optional: await fetchEngineerRequests();
     } catch (err) {
       console.error('Error assigning FME:', err);
     }
@@ -109,7 +110,7 @@ export default function EngineerScheduling() {
       <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
         <h1 className="text-2xl font-bold mb-6">Check the pending engineer schedule requests here!</h1>
 
-        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${selectedRequest ? 'blur-sm pointer-events-none' : ''}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${(selectedRequest || showFmeDialog) ? 'blur-sm pointer-events-none' : ''}`}>
           {requests.map((request) => (
             <div key={request._id} className="bg-white shadow-md rounded-lg p-4">
               <p className="font-semibold text-gray-800 mb-1">{request.applicantName}</p>
@@ -165,9 +166,8 @@ export default function EngineerScheduling() {
 
         {/* FME Assignment Dialog */}
         {showFmeDialog && (
-          <div className="fixed inset-0 z-50 bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg mx-auto max-w-2xl border border-gray-300">
-            <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300"
-              onClick={(e) => e.stopPropagation()}> 
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300" onClick={(e) => e.stopPropagation()}>
               <h2 className="text-2xl font-bold mb-4">Assign FME</h2>
               <div className="space-y-4">
                 {fmes.map((fme) => (

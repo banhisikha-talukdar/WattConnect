@@ -181,19 +181,19 @@ export default function AuthForm({ mode }) {
         </button>
       </div>
 
-      {mode === "signup" && (
-        <select
-          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={formData.role}
-          onChange={(e) => {
-            handleInputChange("role", e.target.value);
-            setIsExistingCustomer(null);
-          }}
-        >
-          <option value="customer">Customer</option>
-          <option value="admin">Admin</option>
-        </select>
-      )}
+      <select
+        className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        value={formData.role}
+        onChange={(e) => {
+          handleInputChange("role", e.target.value);
+          if (mode === "signup") {
+            setIsExistingCustomer(null); // reset only during signup
+          }
+        }}
+      >
+        <option value="customer">Customer</option>
+        <option value="admin">Admin</option>
+      </select>
 
       {mode === "signup" && formData.role === "customer" && (
         <div className="flex flex-col gap-2">
