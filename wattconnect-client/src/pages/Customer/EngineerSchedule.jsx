@@ -77,7 +77,7 @@ export default function EngineerSchedule() {
 
   const handleNext = () => {
     if (/^\d{12}$/.test(consumerNumber)) {
-      navigate("/customer/schedule_my_engineer_form", {
+      navigate("/customer/schedule-my-engineer-form", {
         state: { consumerNumber },
       });
     } else {

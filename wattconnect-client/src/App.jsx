@@ -40,7 +40,7 @@ function App() {
           <Route path="/customer/tips-insights" element={<TipsnInsights />}/>
           <Route path="/customer/my-engineer-scheduling" element={<EngineerSchedule />} />
           <Route path="/customer/my-meter-scheduling" element={<MeterSchedule />} />
-          <Route path="/customer/schedule-my-engineer_form" element={<ScheduleMyEngineerForm />} />
+          <Route path="/customer/schedule-my-engineer-form" element={<ScheduleMyEngineerForm />} />
           <Route path="/customer/schedule-my-meter-form" element={<ScheduleMyMeterForm />} />
           <Route path="/customer/profile" element={<MyProfile />}/>
 

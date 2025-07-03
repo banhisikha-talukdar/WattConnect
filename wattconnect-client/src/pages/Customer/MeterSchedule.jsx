@@ -77,7 +77,7 @@ export default function MeterSchedule() {
 
   const handleNext = () => {
     if (/^\d{12}$/.test(consumerNumber)) {
-      navigate("/customer/schedule_my_meter_form", {
+      navigate("/customer/schedule-my-meter-form", {
         state: { consumerNumber },
       });
     } else {
