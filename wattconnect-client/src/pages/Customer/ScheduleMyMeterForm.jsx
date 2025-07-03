@@ -9,7 +9,7 @@ export default function ScheduleMyMeterForm() {
       <MeterForm
         onSuccess={(formData) => {
           const submittedAt = new Date().toLocaleString();
-          navigate("/customer/my_meter_scheduling", {
+          navigate("/customer/my-meter-scheduling", {
             state: {
               message: `Request for scheduled meter installation visit done successfully!`,
               submittedAt,

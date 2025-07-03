@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from '../../components/Navbar';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function EngineerScheduling() {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [fmes, setFmes] = useState([]);
+  const [selectedFme, setSelectedFme] = useState(null);
+  const [showFmeDialog, setShowFmeDialog] = useState(false);
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchEngineerRequests = async () => {
@@ -31,40 +36,76 @@ export default function EngineerScheduling() {
       }
     };
 
-    fetchEngineerRequests();
-  }, []);
-
-  const handleAccept = async (id) => {
-    try {
-      await axios.put(`http://localhost:5000/api/schedule/engineer/${id}/accept`, null, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      setRequests((prev) => prev.filter((r) => r._id !== id));
-      setSelectedRequest(null);
-    } catch (err) {
-      console.error("Error accepting request:", err);
-    }
-  };
+    if (token) fetchEngineerRequests();
+  }, [token]);
 
   const handleReject = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/schedule/engineer/${id}/reject`, null, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      await axios.post(
+        `http://localhost:5000/api/schedule/${id}/reject`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { type: 'engineer' },
+        }
+      );
+
       setRequests((prev) => prev.filter((r) => r._id !== id));
       setSelectedRequest(null);
     } catch (err) {
-      console.error("Error rejecting request:", err);
+      console.error('Error rejecting request:', err);
+    }
+  };
+
+  const handleAccept = async (id) => {
+    try {
+      await axios.post(
+        `http://localhost:5000/api/schedule/${id}/accept`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { type: 'engineer' },
+        }
+      );
+      // fetching FMEs after accepting
+      const res = await axios.get('http://localhost:5000/api/fmes', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setFmes(Array.isArray(res.data) ? res.data : []);
+      setShowFmeDialog(true);
+    } catch (err) {
+      console.error('Error accepting request or fetching FMEs:', err);
+    }
+  };
+
+  const confirmFmeAssignment = async () => {
+    if (!selectedFme || !selectedRequest) return;
+    const id = selectedRequest._id;
+
+    try {
+      await axios.post(
+        `http://localhost:5000/api/schedule/${id}/assign-fme`,
+        { fmeId: selectedFme._id },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { type: 'engineer' },
+        }
+      );
+
+      // Remove from UI
+      setRequests((prev) => prev.filter((r) => r._id !== id));
+      setSelectedRequest(null);
+      setSelectedFme(null);
+      setShowFmeDialog(false);
+    } catch (err) {
+      console.error('Error assigning FME:', err);
     }
   };
 
   return (
     <div className="flex h-screen bg-[#f4f6fa]">
-        <Navbar type="admin" />
+      <Navbar type="admin" />
       <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
         <h1 className="text-2xl font-bold mb-6">Check the pending engineer schedule requests here!</h1>
 
@@ -84,7 +125,8 @@ export default function EngineerScheduling() {
           ))}
         </div>
 
-        {selectedRequest && (
+        {/* Request Details Panel */}
+        {selectedRequest && !showFmeDialog && (
           <div className="fixed inset-0 z-50 bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg mx-auto max-w-2xl border border-gray-300">
             <h2 className="text-2xl font-bold mb-4">Engineer Visit Details</h2>
             <div className="space-y-2 text-gray-700">
@@ -117,6 +159,44 @@ export default function EngineerScheduling() {
               >
                 Reject
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* FME Assignment Dialog */}
+        {showFmeDialog && (
+          <div className="fixed inset-0 z-50 bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg mx-auto max-w-2xl border border-gray-300">
+            <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300"
+              onClick={(e) => e.stopPropagation()}> 
+              <h2 className="text-2xl font-bold mb-4">Assign FME</h2>
+              <div className="space-y-4">
+                {fmes.map((fme) => (
+                  <div
+                    key={fme._id}
+                    className={`p-4 border rounded cursor-pointer ${
+                      selectedFme && selectedFme._id === fme._id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'hover:border-gray-400'
+                    }`}
+                    onClick={() => setSelectedFme(fme)}
+                  >
+                    <p className="font-semibold text-lg">{fme.name}</p>
+                    <p>Employee ID: {fme.employeeId}</p>
+                    <p>Contact: {fme.contactNumber}</p>
+                    <p>Email: {fme.email}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-4 mt-6">
+                <button
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  disabled={!selectedFme}
+                  onClick={confirmFmeAssignment}
+                >
+                  Confirm
+                </button>
+              </div>
             </div>
           </div>
         )}

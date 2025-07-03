@@ -38,7 +38,7 @@ export default function MeterForm() {
         }
       );
       alert("Meter schedule submitted successfully!");
-      navigate("/customer/my_meter_scheduling");
+      navigate("/customer/my-meter-scheduling");
       console.log("✅ Response:", res.data);
     } catch (err) {
       console.error("❌ Submission error:", err.response?.data || err.message);

@@ -38,7 +38,7 @@ export default function EngineerForm() {
         }
       );
       alert("Engineer schedule submitted successfully!");
-      navigate("/customer/my_engineer_scheduling");
+      navigate("/customer/my-engineer-scheduling");
       console.log("✅ Response:", res.data);
     } catch (err) {
       console.error("❌ Submission error:", err.response?.data || err.message);

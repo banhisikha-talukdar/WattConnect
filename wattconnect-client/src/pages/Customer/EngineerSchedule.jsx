@@ -1,18 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function EngineerSchedule() {
   const [consumerNumber, setConsumerNumber] = useState("");
   const [error, setError] = useState("");
   const [submissions, setSubmissions] = useState([]);
+  const [userConsumerNumber, setUserConsumerNumber] = useState(null);
+  const [userId, setUserId] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { token } = useContext(AuthContext);
   const { state } = location;
 
-  // When redirected from the form with new submission, pre-fill consumer number
+  // 🔐 Fetch authenticated user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUserConsumerNumber(res.data.consumerNumber || null);
+        setUserId(res.data._id);
+      } catch (err) {
+        console.error("Failed to fetch user info:", err);
+      }
+    };
+
+    fetchUserData();
+  }, [token]);
+
+  // Pre-fill consumerNumber if redirected from form submission
   useEffect(() => {
     if (state?.formData?.consumerNumber) {
       setConsumerNumber(state.formData.consumerNumber);
@@ -24,17 +48,16 @@ export default function EngineerSchedule() {
       if (!consumerNumber) return;
 
       try {
-        const result = await axios.get("/api/schedule", {
+        const result = await axios.get("http://localhost:5000/api/schedule", {
           params: {
             type: "engineer",
             consumerNumber: consumerNumber,
           },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
-        // 🛠️ Fix: ensure result.data is an array
         const responseData = Array.isArray(result.data)
           ? result.data
           : Array.isArray(result.data.data)
@@ -45,7 +68,6 @@ export default function EngineerSchedule() {
           (item) => item.status === "Pending"
         );
 
-        // If a new form was just submitted (from EngineerForm), show it too
         if (state?.formData) {
           const newSubmission = {
             id: Date.now(),
@@ -56,7 +78,6 @@ export default function EngineerSchedule() {
             consumerNumber: state.formData.consumerNumber,
           };
 
-          // Avoid duplication
           const isDuplicate = filtered.some(
             (item) =>
               item.formData?.consumerNumber === newSubmission.formData.consumerNumber &&
@@ -73,21 +94,36 @@ export default function EngineerSchedule() {
     };
 
     fetchSubmissions();
-  }, [consumerNumber, state]);
+  }, [consumerNumber, state, token]);
 
   const handleNext = () => {
-    if (/^\d{12}$/.test(consumerNumber)) {
-      navigate("/customer/schedule-my-engineer-form", {
-        state: { consumerNumber },
-      });
-    } else {
-      setError("Invalid consumer number or consumer does not exist.");
+    console.log("Entered:", consumerNumber);
+    console.log("Expected:", userConsumerNumber);
+
+    if (!/^\d{12}$/.test(consumerNumber)) {
+      setError("Invalid consumer number format.");
+      return;
     }
+
+    if (!userConsumerNumber) {
+      setError("You don't have a registered consumer number.");
+      return;
+    }
+
+    if (String(consumerNumber) !== String(userConsumerNumber)) {
+      setError("Entered consumer number does not match your account.");
+      return;
+    }
+
+    console.log("✅ Redirecting to form page...");
+    navigate("/customer/schedule-my-engineer-form", {
+      state: { consumerNumber },
+    });
   };
 
+
   const handleNoConsumer = () => {
-    alert("Invalid consumer or consumer does not exist.");
-    navigate("/customer/dashboard");
+    navigate("/customer/new-application");
   };
 
   return (
@@ -151,13 +187,9 @@ export default function EngineerSchedule() {
 
                 {submission.formData && (
                   <div className="text-sm text-gray-700 mt-2 space-y-1">
-                    <p><strong>Name:</strong> {submission.formData.applicantName}</p>
-                    <p><strong>District:</strong> {submission.formData.district}</p>
-                    <p><strong>Subdivision:</strong> {submission.formData.subdivision}</p>
-                    <p><strong>Address:</strong> {submission.formData.address}</p>
-                    <p><strong>Purpose:</strong> {submission.formData.usageType}</p>
-                    <p><strong>Reason:</strong> {submission.formData.reason}</p>
-                    <p><strong>Preferred Date:</strong> {submission.formData.preferredDate}</p>
+                    <p><strong>Usage Type:</strong> {submission.formData?.usageType ?? "N/A"}</p>
+                    <p><strong>Reason:</strong> {submission.formData?.reason ?? "N/A"}</p>
+                    <p><strong>Preferred Date:</strong> {submission.formData?.preferredDate ?? "N/A"}</p>
                   </div>
                 )}
 

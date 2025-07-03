@@ -1,18 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function MeterSchedule() {
   const [consumerNumber, setConsumerNumber] = useState("");
   const [error, setError] = useState("");
   const [submissions, setSubmissions] = useState([]);
+  const [userConsumerNumber, setUserConsumerNumber] = useState(null);
+  const [userId, setUserId] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { token } = useContext(AuthContext);
   const { state } = location;
 
-  // When redirected from the form with new submission, pre-fill consumer number
+  // 🔐 Fetch authenticated user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUserConsumerNumber(res.data.consumerNumber || null);
+        setUserId(res.data._id);
+      } catch (err) {
+        console.error("Failed to fetch user info:", err);
+      }
+    };
+
+    fetchUserData();
+  }, [token]);
+
+  // Pre-fill consumerNumber if redirected from form submission
   useEffect(() => {
     if (state?.formData?.consumerNumber) {
       setConsumerNumber(state.formData.consumerNumber);
@@ -24,17 +48,16 @@ export default function MeterSchedule() {
       if (!consumerNumber) return;
 
       try {
-        const result = await axios.get("/api/schedule", {
+        const result = await axios.get("http://localhost:5000/api/schedule", {
           params: {
             type: "meter",
             consumerNumber: consumerNumber,
           },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
-        // 🛠️ Fix: ensure result.data is an array
         const responseData = Array.isArray(result.data)
           ? result.data
           : Array.isArray(result.data.data)
@@ -45,7 +68,6 @@ export default function MeterSchedule() {
           (item) => item.status === "Pending"
         );
 
-        // If a new form was just submitted (from MeterForm), show it too
         if (state?.formData) {
           const newSubmission = {
             id: Date.now(),
@@ -56,7 +78,6 @@ export default function MeterSchedule() {
             consumerNumber: state.formData.consumerNumber,
           };
 
-          // Avoid duplication
           const isDuplicate = filtered.some(
             (item) =>
               item.formData?.consumerNumber === newSubmission.formData.consumerNumber &&
@@ -73,27 +94,42 @@ export default function MeterSchedule() {
     };
 
     fetchSubmissions();
-  }, [consumerNumber, state]);
+  }, [consumerNumber, state, token]);
 
   const handleNext = () => {
-    if (/^\d{12}$/.test(consumerNumber)) {
-      navigate("/customer/schedule-my-meter-form", {
-        state: { consumerNumber },
-      });
-    } else {
-      setError("Invalid consumer number or consumer does not exist.");
+    console.log("Entered:", consumerNumber);
+    console.log("Expected:", userConsumerNumber);
+
+    if (!/^\d{12}$/.test(consumerNumber)) {
+      setError("Invalid consumer number format.");
+      return;
     }
+
+    if (!userConsumerNumber) {
+      setError("You don't have a registered consumer number.");
+      return;
+    }
+
+    if (String(consumerNumber) !== String(userConsumerNumber)) {
+      setError("Entered consumer number does not match your account.");
+      return;
+    }
+
+    console.log("✅ Redirecting to form page...");
+    navigate("/customer/schedule-my-meter-form", {
+      state: { consumerNumber },
+    });
   };
 
+
   const handleNoConsumer = () => {
-    alert("Invalid consumer or consumer does not exist.");
-    navigate("/customer/dashboard");
+    navigate("/customer/new-application");
   };
 
   return (
     <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="customer" />
-  
+
       <main className="flex-1 px-4 sm:px-8 pt-20 pb-10 overflow-y-auto">
         {/* Header + Input Form Section */}
         <div className="w-full max-w-md mx-auto mb-6 sm:mb-10 sm:bg-white sm:p-8 p-4 bg-transparent sm:rounded-2xl sm:shadow-md shadow-none">
@@ -104,7 +140,7 @@ export default function MeterSchedule() {
           <label className="block text-gray-700 mb-2 text-center">
             Enter your 12-digit Consumer Number
           </label>
-  
+
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <input
               type="text"
@@ -114,21 +150,26 @@ export default function MeterSchedule() {
               className="w-full sm:flex-1 border border-gray-300 p-2 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="e.g. 123456789012"
             />
-            <button onClick={handleNext}
-                className="bg-[#01217e] text-white px-5 py-2 rounded-lg hover:bg-[#fcbe03] transition duration-300">
+            <button
+              onClick={handleNext}
+              className="bg-[#01217e] text-white px-5 py-2 rounded-lg hover:bg-[#fcbe03] transition duration-300"
+            >
               Next
             </button>
           </div>
-  
+
           {error && <p className="text-red-500 text-center mt-2">{error}</p>}
-  
+
           <div className="text-center mt-3">
-            <button onClick={handleNoConsumer} className="text-sm text-blue-600 hover:underline">
+            <button
+              onClick={handleNoConsumer}
+              className="text-sm text-blue-600 hover:underline"
+            >
               I don’t have a consumer number
             </button>
           </div>
         </div>
-  
+
         {/* Submissions Grid */}
         {submissions.length > 0 && (
           <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -143,16 +184,12 @@ export default function MeterSchedule() {
                 <p className="text-sm text-gray-500 mb-2">
                   Submitted on: {submission.submittedAt}
                 </p>
-  
+
                 {submission.formData && (
                   <div className="text-sm text-gray-700 mt-2 space-y-1">
-                    <p><strong>Name:</strong> {submission.formData.applicantName}</p>
-                    <p><strong>District:</strong> {submission.formData.district}</p>
-                    <p><strong>Subdivision:</strong> {submission.formData.subdivision}</p>
-                    <p><strong>Address:</strong> {submission.formData.address}</p>
-                    <p><strong>Purpose:</strong> {submission.formData.usageType}</p>
-                    <p><strong>Reason:</strong> {submission.formData.reason}</p>
-                    <p><strong>Preferred Date:</strong> {submission.formData.preferredDate}</p>
+                    <p><strong>Usage Type:</strong> {submission.formData?.usageType ?? "N/A"}</p>
+                    <p><strong>Reason:</strong> {submission.formData?.reason ?? "N/A"}</p>
+                    <p><strong>Preferred Date:</strong> {submission.formData?.preferredDate ?? "N/A"}</p>
                   </div>
                 )}
 
@@ -166,7 +203,7 @@ export default function MeterSchedule() {
                   }`}
                 >
                   {submission.status}
-               </span>
+                </span>
               </div>
             ))}
           </div>

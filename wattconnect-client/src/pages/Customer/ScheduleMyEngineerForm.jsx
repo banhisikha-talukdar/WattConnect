@@ -9,7 +9,7 @@ export default function ScheduleMyEngineerForm() {
       <EngineerForm
         onSuccess={(formData) => {
           const submittedAt = new Date().toLocaleString();
-          navigate("/customer/my_engineer_scheduling", {
+          navigate("/customer/my-engineer-scheduling", {
             state: {
               message: `Request for scheduled engineer visit done successfully!`,
               submittedAt,
