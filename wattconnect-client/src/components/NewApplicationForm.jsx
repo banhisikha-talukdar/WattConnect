@@ -14,7 +14,7 @@ export default function NewApplication() {
     villageOrTown: '',
     postOffice: '',
     policeStation: '',
-    addressDistrict: '',
+    district: '', 
     pinCode: '',
     mobileNumber: '',
     declaration: false
@@ -64,7 +64,7 @@ export default function NewApplication() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
 
-  const categories = ['Domestic', 'Residential'];
+  const categories = ['Domestic', 'Commercial'];
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -99,7 +99,7 @@ export default function NewApplication() {
     const requiredFields = [
       'district', 'subdivision', 'appliedCategory', 'appliedLoad',
       'name', 'fatherName', 'area', 'villageOrTown', 
-      'postOffice', 'policeStation', 'addressDistrict',
+      'postOffice', 'policeStation', 'district',
       'pinCode', 'mobileNumber'
     ];
 
@@ -131,11 +131,12 @@ export default function NewApplication() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) {
-      setSubmitStatus('Please fix the errors before submitting.');
+      setSubmitStatus('Please fill the required fields.');
       return;
     }
 
@@ -143,45 +144,55 @@ export default function NewApplication() {
     setSubmitStatus('');
 
     const payload = new FormData();
-    
+
     payload.append('district', formData.district);
     payload.append('subdivision', formData.subdivision);
     payload.append('appliedCategory', formData.appliedCategory);
     payload.append('appliedLoad', formData.appliedLoad);
-    payload.append('name', formData.name);
-    payload.append('fatherName', formData.fatherName);
-    payload.append('area', formData.area);
-    payload.append('villageOrTown', formData.villageOrTown);
-    payload.append('postOffice', formData.postOffice);
-    payload.append('policeStation', formData.policeStation);
-    payload.append('addressDistrict', formData.addressDistrict);
-    payload.append('pinCode', formData.pinCode);
-    payload.append('mobileNumber', formData.mobileNumber);
+
+    payload.append('consumerDetails[name]', formData.name);
+    payload.append('consumerDetails[fatherName]', formData.fatherName);
+
+    payload.append('addressDetails[area]', formData.area);
+    payload.append('addressDetails[villageOrTown]', formData.villageOrTown);
+    payload.append('addressDetails[postOffice]', formData.postOffice);
+    payload.append('addressDetails[policeStation]', formData.policeStation);
+    payload.append('addressDetails[district]', formData.district);
+    payload.append('addressDetails[pinCode]', formData.pinCode);
+    payload.append('addressDetails[mobileNumber]', formData.mobileNumber);
 
     Object.entries(files).forEach(([key, file]) => {
-      if (file) payload.append(key, file);
+      if (file) {
+        payload.append(key, file);
+      }
     });
 
     try {
-      const res = await fetch("/api/new-connection", {
-        method: 'POST',
+      const res = await fetch("http://localhost:5000/api/new-connection", {
+        method: "POST",
         headers: {
-        ...(localStorage.getItem("token") && {'Authorization': `Bearer ${localStorage.getItem("token")}`
-      })
-    },
-        body: payload
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: payload,
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'API responded with an error');
+        let errorMessage;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || `Error! ${res.status}`;
+        } catch {
+          errorMessage = `Error! ${res.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const result = await res.json();
-      setSubmitStatus('Application submitted successfully!');
-      console.log('Submitted:', result);
+
+      setSubmitStatus("Application submitted successfully!");
+      console.log("Submitted:", result);
     } catch (err) {
-      console.error(err);
+      console.error("Submission error:", err);
       setSubmitStatus(`Submission failed: ${err.message}`);
     } finally {
       setIsSubmitting(false);
@@ -200,7 +211,7 @@ export default function NewApplication() {
       villageOrTown: '', 
       postOffice: '',
       policeStation: '',
-      addressDistrict: '',
+      district: '',
       pinCode: '',
       mobileNumber: '',
       declaration: false
@@ -223,7 +234,7 @@ export default function NewApplication() {
     if (validateForm()) {
       setSubmitStatus("Form verified successfully! Ready to submit.");
     } else {
-      setSubmitStatus('Please fix the errors to verify the form.');
+      setSubmitStatus("Please fill the required fields.");
     }
   };
 
@@ -330,34 +341,46 @@ export default function NewApplication() {
           <div className="bg-green-50 p-6 rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Application Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Applied Category <span className="text-red-500">*</span></label>
-                <select
-                  name="appliedCategory"
-                  value={formData.appliedCategory}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                >
-                  <option value="">Select category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-                {errors.appliedCategory && (
-                  <p className="text-red-500 text-xs mt-1">{errors.appliedCategory}</p>
-                )}
+            <div>
+            <label className="block text-sm font-medium mb-2">Applied Category <span className="text-red-500">*</span></label>
+            <select
+              name="appliedCategory"
+              value={formData.appliedCategory}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Select category</option>
+              {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            {errors.appliedCategory && (
+            <p className="text-red-500 text-xs mt-1">{errors.appliedCategory}</p>
+             )}
+            </div>
+
+            <div>
+            <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium">Applied Load (KW) <span className="text-red-500">*</span></label>
+              <a href="https://drive.google.com/file/d/1BfmeZVeQ1oJBRV8EQEyiuXvGKqeHA1yw/view?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                View allowed load of categories
+              </a>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Applied Load (KW) <span className="text-red-500">*</span></label>
-                <input
-                  name="appliedLoad"
-                  value={formData.appliedLoad}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  placeholder="Enter load"
-                />
-                {errors.appliedLoad && <p className="text-red-500 text-xs mt-1">{errors.appliedLoad}</p>}
-              </div>
+            <input
+              name="appliedLoad"
+              value={formData.appliedLoad}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-md"
+              placeholder="Enter load"
+            />
+              {errors.appliedLoad && (
+              <p className="text-red-500 text-xs mt-1">{errors.appliedLoad}</p>
+               )}
+            </div>
             </div>
           </div>
 
@@ -399,7 +422,7 @@ export default function NewApplication() {
                 { name: 'villageOrTown', label: 'Village/Town' }, 
                 { name: 'postOffice', label: 'Post Office' },
                 { name: 'policeStation', label: 'Police Station' },
-                { name: 'addressDistrict', label: 'District' },
+                { name: 'district', label: 'District' },
                 { name: 'pinCode', label: 'Pin Code', max: 6 }
               ].map(({ name, label, max }) => (
                 <div key={name}>
@@ -440,8 +463,8 @@ export default function NewApplication() {
               <FileUpload label="Residential Address Proof (DL / Bank Passbook / Aadhaar / Ration Card / Passport / Electricity Bill / Local Certificate)" fileType="addressProof" />
               <FileUpload label="Proof of Legal Occupation (Holding No., Lease/Rent/Sale Deed)" fileType="legalOccupationProof" />
               <FileUpload label="Test Report from Electrical Contractor/Supervisor" fileType="testReport" />
-              <FileUpload label="Latest Passport Size Photo of the Applicant (jpeg, jpg or png)" fileType="passportPhoto" />
-              <FileUpload label="Affidavit from land owner with No Objection and optional Indemnity Bond (if not owner)" fileType="affidavitOrNOC" />
+              <FileUpload label="Latest Passport Size passportPhoto of the Applicant (jpeg, jpg or png)" fileType="passportPhoto" />
+              <FileUpload label="affidavitOrNOC from land owner with No Objection and optional Indemnity Bond (if not owner)" fileType="affidavitOrNOC" />
               <FileUpload label="Standard Agreement Form" fileType="agreementForm" />
               <FileUpload label="Additional Documents for Online HT Connection" fileType="htAdditionalDocs" required={false} />
             </div>
