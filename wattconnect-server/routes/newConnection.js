@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const fs = require("fs");
 const path = require("path");
 
 const { verifyToken } = require("../middleware/auth");
@@ -9,6 +10,9 @@ const {
   submitApplication,
   getApplications,
 } = require("../controllers/newConnectionController");
+
+const uploadPath = path.join(__dirname, "..", "uploads", "applications");
+fs.mkdirSync(uploadPath, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

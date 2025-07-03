@@ -14,7 +14,7 @@ const submitApplication = async (req, res) => {
     const uploads = req.files || {};
 
     const newForm = new NewConnection({
-      userId: req.user.id,
+      userId: req.user.userId,
       district,
       subdivision,
       appliedCategory,
