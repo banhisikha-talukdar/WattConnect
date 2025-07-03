@@ -9,6 +9,7 @@ const usageRoutes = require('./routes/usage');
 const newConnectionRoute = require("./routes/newConnection");
 const tariffRoutes = require("./routes/tariff");
 const scheduleRoutes = require('./routes/schedule');
+const fmeRoutes = require("./routes/fme");
 
 dotenv.config();
 connectDB();
@@ -27,6 +28,7 @@ app.use('/api/usage', usageRoutes);
 app.use("/api/new-connection", newConnectionRoute);
 app.use("/api/tariffs", tariffRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use("/api/fmes", fmeRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -143,9 +143,13 @@ exports.getMe = async (req, res) => {
     const user = await User.findById(req.user.userId).select(
       "username email role consumerNumber usageType category isExistingCustomer"
     );
+
+    console.log("🔎 getMe response user:", user);
+
     if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json({
+      id: user._id,
       username: user.username,
       email: user.email,
       role: user.role,
