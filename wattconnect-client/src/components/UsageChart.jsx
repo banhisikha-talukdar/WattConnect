@@ -26,22 +26,19 @@ function formatDateLabel(dateStr) {
   const monthShort = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-  ][parseInt(mm) - 1];
+  ][parseInt(mm) - 1] || "???";
 
   const suffix = (d) =>
-    d === 1 || d === 21 || d === 31
-      ? "st"
-      : d === 2 || d === 22
-      ? "nd"
-      : d === 3 || d === 23
-      ? "rd"
-      : "th";
+    d === 1 || d === 21 || d === 31 ? "st" :
+    d === 2 || d === 22 ? "nd" :
+    d === 3 || d === 23 ? "rd" : "th";
 
   return `${day}${suffix(day)} ${monthShort}`;
 }
 
 function getAllDaysInMonth(year, monthName) {
   const month = months.indexOf(monthName);
+  if (month === -1 || !year) return [];
   const date = new Date(year, month, 1);
   const dates = [];
   while (date.getMonth() === month) {
@@ -55,12 +52,25 @@ function getAllDaysInMonth(year, monthName) {
 }
 
 export default function UsageChart() {
+  const { token } = useContext(AuthContext);
   const [usageData, setUsageData] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("January");
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { token } = useContext(AuthContext);
+
+  useEffect(() => {
+  if (!selectedYear) {
+    const currentYear = new Date().getFullYear();
+    setSelectedYear(String(currentYear));
+  }
+
+  if (!selectedMonth) {
+    const currentMonthIndex = new Date().getMonth();
+    setSelectedMonth(months[currentMonthIndex]);
+  }
+}, [selectedYear, selectedMonth]);
+
 
   useEffect(() => {
     if (!token) {
@@ -102,12 +112,6 @@ export default function UsageChart() {
 
   const years = Array.from(new Set(usageData.map((entry) => entry.year))).sort();
 
-  useEffect(() => {
-    if (years.length > 0 && !selectedYear) {
-      setSelectedYear(String(years[0]));
-    }
-  }, [years, selectedYear]);
-
   const filteredData = usageData.filter(
     (entry) =>
       String(entry.year) === String(selectedYear) &&
@@ -116,19 +120,34 @@ export default function UsageChart() {
 
   const allDates = getAllDaysInMonth(Number(selectedYear), selectedMonth);
   const groupedData = {};
+
   filteredData.forEach(({ formattedDate, unitsUsed, usageType }) => {
     if (!groupedData[formattedDate]) {
       groupedData[formattedDate] = { domestic: 0, commercial: 0 };
     }
-    groupedData[formattedDate][usageType.toLowerCase()] = unitsUsed;
+
+    const units = parseFloat(unitsUsed);
+if (!isNaN(units)) {
+  groupedData[formattedDate][usageType.toLowerCase()] = units;
+}
+
   });
 
-  const domesticData = allDates.map((date) => groupedData[date]?.domestic || 0);
-  const commercialData = allDates.map((date) => groupedData[date]?.commercial || 0);
-  const labels = allDates.map(formatDateLabel);
+  const domesticData = allDates.map((date) => {
+  const val = groupedData[date]?.domestic;
+  return !isNaN(val) ? val : 0;
+});
+
+const commercialData = allDates.map((date) => {
+  const val = groupedData[date]?.commercial;
+  return !isNaN(val) ? val : 0;
+});
+
+
+  const labels = allDates.map((d) => formatDateLabel(d));
 
   const datasets = [];
-  if (domesticData.some((val) => val !== 0)) {
+  if (domesticData.some((v) => v > 0)) {
     datasets.push({
       label: "Domestic",
       data: domesticData,
@@ -137,7 +156,7 @@ export default function UsageChart() {
       fill: false,
     });
   }
-  if (commercialData.some((val) => val !== 0)) {
+  if (commercialData.some((v) => v > 0)) {
     datasets.push({
       label: "Commercial",
       data: commercialData,
@@ -169,28 +188,26 @@ export default function UsageChart() {
       <h2 className="text-2xl font-bold mb-4 text-[#226c82] text-center">
         Monthly Usage Chart
       </h2>
-
-      <div className="flex justify-center gap-4 mb-6">
         <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(e.target.value)}
-          className="border border-gray-300 px-4 py-2 rounded"
-        >
-          {years.map((year, index) => (
-            <option key={`year-${index}`} value={year}>{year}</option>
-          ))}
-        </select>
+  value={selectedYear || ""}
+  onChange={(e) => setSelectedYear(e.target.value)}
+  className="border border-gray-300 px-4 py-2 rounded"
+>
+  {years.map((year, index) => (
+    <option key={index} value={String(year)}>{String(year)}</option>
+  ))}
+</select>
 
-        <select
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          className="border border-gray-300 px-4 py-2 rounded"
-        >
-          {months.map((month, index) => (
-            <option key={`month-${index}`} value={month}>{month}</option>
-          ))}
-        </select>
-      </div>
+<select
+  value={selectedMonth || ""}
+  onChange={(e) => setSelectedMonth(e.target.value)}
+  className="border border-gray-300 px-4 py-2 rounded"
+>
+  {months.map((month, index) => (
+    <option key={index} value={month}>{month}</option>
+  ))}
+</select>
+
 
       {datasets.length > 0 ? (
         <Line data={chartData} options={options} />

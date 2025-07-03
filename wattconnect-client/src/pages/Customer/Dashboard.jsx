@@ -2,6 +2,7 @@ import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import TariffChart from "../../components/TariffChart";
 import UsageChart from "../../components/UsageChart";
+import ViewBill from "../../components/ViewBill";
 
 const username = "Customer";
 
@@ -29,6 +30,12 @@ export default function CustomerDashboard() {
             Add New
           </button>
         </div>
+
+        <div>
+          <ViewBill />
+        </div>
+
+        <br/>
 
         {/* Charts Section */}
         <div className="max-w-5xl mx-auto space-y-10">
