@@ -54,10 +54,8 @@ function getAllDaysInMonth(year, monthName) {
   return dates;
 }
 
-export default function UsageChart() {
+export default function UsageChart({ selectedYear, setSelectedYear, selectedMonth, setSelectedMonth }) {
   const [usageData, setUsageData] = useState([]);
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("January");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { token } = useContext(AuthContext);
@@ -101,12 +99,6 @@ export default function UsageChart() {
   }, [token]);
 
   const years = Array.from(new Set(usageData.map((entry) => entry.year))).sort();
-
-  useEffect(() => {
-    if (years.length > 0 && !selectedYear) {
-      setSelectedYear(String(years[0]));
-    }
-  }, [years, selectedYear]);
 
   const filteredData = usageData.filter(
     (entry) =>
