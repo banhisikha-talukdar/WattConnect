@@ -33,7 +33,7 @@ const Landing = () => {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img src={heroImage} alt="Hero Background"  className="w-full h-full object-cover"/>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-blue-100/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#b0daf2]" />
         </div>
 
         {/* Header and Hero Content on Top */}
