@@ -9,14 +9,13 @@ export default function MeterSchedule() {
   const [error, setError] = useState("");
   const [submissions, setSubmissions] = useState([]);
   const [userConsumerNumber, setUserConsumerNumber] = useState(null);
-  const [userId, setUserId] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useContext(AuthContext);
   const { state } = location;
 
-  // 🔐 Fetch authenticated user data
+  //Fetch authenticated user's consumer number
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -27,7 +26,6 @@ export default function MeterSchedule() {
         });
 
         setUserConsumerNumber(res.data.consumerNumber || null);
-        setUserId(res.data._id);
       } catch (err) {
         console.error("Failed to fetch user info:", err);
       }
@@ -36,70 +34,33 @@ export default function MeterSchedule() {
     fetchUserData();
   }, [token]);
 
-  // Pre-fill consumerNumber if redirected from form submission
-  useEffect(() => {
-    if (state?.formData?.consumerNumber) {
-      setConsumerNumber(state.formData.consumerNumber);
-    }
-  }, [state]);
-
+  // Fetch all meter submissions and filter by logged-in user's consumer number
   useEffect(() => {
     const fetchSubmissions = async () => {
-      if (!consumerNumber) return;
+      if (!userConsumerNumber) return;
 
       try {
         const result = await axios.get("http://localhost:5000/api/schedule", {
           params: {
             type: "meter",
-            consumerNumber: consumerNumber,
+            consumerNumber: userConsumerNumber,
           },
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        const responseData = Array.isArray(result.data)
-          ? result.data
-          : Array.isArray(result.data.data)
-          ? result.data.data
-          : [];
-
-        const filtered = responseData.filter(
-          (item) => item.status === "Pending"
-        );
-
-        if (state?.formData) {
-          const newSubmission = {
-            id: Date.now(),
-            message: "Submitted successfully",
-            submittedAt: new Date().toLocaleString(),
-            status: "Pending",
-            formData: state.formData,
-            consumerNumber: state.formData.consumerNumber,
-          };
-
-          const isDuplicate = filtered.some(
-            (item) =>
-              item.formData?.consumerNumber === newSubmission.formData.consumerNumber &&
-              item.formData?.preferredDate === newSubmission.formData.preferredDate
-          );
-
-          setSubmissions(isDuplicate ? filtered : [newSubmission, ...filtered]);
-        } else {
-          setSubmissions(filtered);
-        }
+        const responseData = Array.isArray(result.data) ? result.data : [];
+        setSubmissions(responseData);
       } catch (error) {
         console.error("Error fetching submissions:", error);
       }
     };
 
     fetchSubmissions();
-  }, [consumerNumber, state, token]);
+  }, [userConsumerNumber, token]);
 
   const handleNext = () => {
-    console.log("Entered:", consumerNumber);
-    console.log("Expected:", userConsumerNumber);
-
     if (!/^\d{12}$/.test(consumerNumber)) {
       setError("Invalid consumer number format.");
       return;
@@ -115,12 +76,10 @@ export default function MeterSchedule() {
       return;
     }
 
-    console.log("✅ Redirecting to form page...");
     navigate("/customer/schedule-my-meter-form", {
       state: { consumerNumber },
     });
   };
-
 
   const handleNoConsumer = () => {
     navigate("/customer/new-application");
@@ -170,42 +129,53 @@ export default function MeterSchedule() {
           </div>
         </div>
 
-        {/* Submissions Grid */}
+        {/* Submissions Table */}
         {submissions.length > 0 && (
-          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {submissions.map((submission) => (
-              <div
-                key={submission.id}
-                className="bg-white shadow-sm border border-gray-200 rounded-xl p-4 hover:shadow-md transition"
-              >
-                <p className="text-gray-800 font-medium mb-1">
-                  {submission.message || "Submitted request"}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  Submitted on: {submission.submittedAt}
-                </p>
-
-                {submission.formData && (
-                  <div className="text-sm text-gray-700 mt-2 space-y-1">
-                    <p><strong>Usage Type:</strong> {submission.formData?.usageType ?? "N/A"}</p>
-                    <p><strong>Reason:</strong> {submission.formData?.reason ?? "N/A"}</p>
-                    <p><strong>Preferred Date:</strong> {submission.formData?.preferredDate ?? "N/A"}</p>
-                  </div>
-                )}
-
-                <span
-                  className={`inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full ${
-                    submission.status === "Pending"
-                      ? "bg-yellow-200 text-yellow-800"
-                      : submission.status === "Accepted"
-                      ? "bg-green-200 text-green-800"
-                      : "bg-red-100 text-red-800 border border-red-300"
-                  }`}
-                >
-                  {submission.status}
-                </span>
-              </div>
-            ))}
+          <div className="max-w-7xl mx-auto overflow-x-auto">
+            <h3 className="text-xl font-semibold text-[#01217e] mb-4 text-center">
+              Your Submitted Meter Installation Requests
+            </h3>
+            <table className="min-w-full bg-white border border-gray-200 rounded-xl shadow-sm">
+              <thead className="bg-gray-100 text-gray-700 text-sm font-semibold">
+                <tr>
+                  <th className="py-3 px-4 border-b text-left">Usage Type</th>
+                  <th className="py-3 px-4 border-b text-left">Reason</th>
+                  <th className="py-3 px-4 border-b text-left">Preferred Date</th>
+                  <th className="py-3 px-4 border-b text-left">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {submissions.map((submission, index) => (
+                  <tr key={submission._id || index} className="hover:bg-gray-50 transition">
+                    <td className="py-3 px-4 border-gray-200">
+                      {submission.usageType ?? "N/A"}
+                    </td>
+                    <td className="py-3 px-4 border-gray-200">
+                      {submission.reason ?? "N/A"}
+                    </td>
+                    <td className="py-3 px-4 border-gray-200">
+                      {submission.preferredDate
+                        ? new Date(submission.preferredDate).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className="py-3 px-4 border-gray-200">
+                      <span
+                        className={`px-3 py-1 text-xs font-semibold rounded-full inline-block
+                          ${
+                            submission.status === "Pending"
+                              ? "bg-yellow-200 text-yellow-800"
+                              : submission.status === "Accepted"
+                              ? "bg-green-200 text-green-800"
+                              : "bg-red-100 text-red-800 border border-red-300"
+                          }`}
+                      >
+                        {submission.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </main>

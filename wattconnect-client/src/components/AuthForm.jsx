@@ -111,7 +111,11 @@ export default function AuthForm({ mode }) {
           navigate("/customer/new-application");
         }
       } else if (mode === "login") {
-        if (data.user?.role === "admin" || formData.role === "admin") {
+        if (data.user?.role !== formData.role) {
+          alert("Role mismatch");
+          return;
+        }
+        else if (data.user?.role === "admin" && formData.role === "admin") {
           navigate("/admin/home");
         } else {
           navigate("/customer/dashboard");

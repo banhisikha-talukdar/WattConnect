@@ -11,27 +11,25 @@ export default function EngineerScheduling() {
   const [showFmeDialog, setShowFmeDialog] = useState(false);
   const { token } = useContext(AuthContext);
 
-  
   const fetchEngineerRequests = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/schedule', {
         params: { type: 'engineer' },
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("API response for engineer requests:", res.data);
-
-       const requestList = Array.isArray(res.data)
+      const requestList = Array.isArray(res.data)
         ? res.data
         : Array.isArray(res.data.data)
         ? res.data.data
         : [];
 
-      setRequests(requestList);
+      const pendingOnly = requestList.filter((r) => r.status === 'Pending');
+      setRequests(pendingOnly);
     } catch (err) {
-      console.error("Error fetching engineer requests:", err);
+      console.error('Error fetching engineer requests:', err);
       setRequests([]);
     }
   };
@@ -50,8 +48,7 @@ export default function EngineerScheduling() {
           params: { type: 'engineer' },
         }
       );
-
-      setRequests((prev) => prev.filter((r) => r._id !== id));
+      await fetchEngineerRequests();
       setSelectedRequest(null);
     } catch (err) {
       console.error('Error rejecting request:', err);
@@ -68,7 +65,7 @@ export default function EngineerScheduling() {
           params: { type: 'engineer' },
         }
       );
-      // fetching FMEs after accepting
+
       const res = await axios.get('http://localhost:5000/api/fmes', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -82,11 +79,10 @@ export default function EngineerScheduling() {
 
   const confirmFmeAssignment = async () => {
     if (!selectedFme || !selectedRequest) return;
-    const id = selectedRequest._id;
 
     try {
       await axios.post(
-        `http://localhost:5000/api/schedule/${id}/assign-fme`,
+        `http://localhost:5000/api/schedule/${selectedRequest._id}/assign-fme`,
         { fmeId: selectedFme._id },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -94,11 +90,10 @@ export default function EngineerScheduling() {
         }
       );
 
-      setRequests((prev) => prev.filter((r) => r._id !== id));
-      setSelectedRequest(null);
       setSelectedFme(null);
+      setSelectedRequest(null);
       setShowFmeDialog(false);
-      // Optional: await fetchEngineerRequests();
+      await fetchEngineerRequests(); // Only now refresh
     } catch (err) {
       console.error('Error assigning FME:', err);
     }
@@ -108,7 +103,7 @@ export default function EngineerScheduling() {
     <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="admin" />
       <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
-        <h1 className="text-2xl font-bold mb-6">Check the pending engineer schedule requests here!</h1>
+        <h1 className="text-2xl font-bold mb-6">Pending engineer schedule requests</h1>
 
         <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${(selectedRequest || showFmeDialog) ? 'blur-sm pointer-events-none' : ''}`}>
           {requests.map((request) => (
@@ -169,7 +164,7 @@ export default function EngineerScheduling() {
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300" onClick={(e) => e.stopPropagation()}>
               <h2 className="text-2xl font-bold mb-4">Assign FME</h2>
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[400px] overflow-y-auto">
                 {fmes.map((fme) => (
                   <div
                     key={fme._id}
@@ -189,6 +184,15 @@ export default function EngineerScheduling() {
               </div>
 
               <div className="flex justify-end gap-4 mt-6">
+                <button
+                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                  onClick={() => {
+                    setShowFmeDialog(false);
+                    setSelectedFme(null);
+                  }}
+                >
+                  Cancel
+                </button>
                 <button
                   className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                   disabled={!selectedFme}
