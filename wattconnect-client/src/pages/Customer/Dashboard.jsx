@@ -1,5 +1,6 @@
 import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import TariffChart from "../../components/TariffChart";
 import UsageChart from "../../components/UsageChart";
 import ViewBill from "../../components/ViewBill";
@@ -7,6 +8,10 @@ import ViewBill from "../../components/ViewBill";
 const username = "Customer";
 
 export default function CustomerDashboard() {
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
   const navigate = useNavigate();
 
   const handleAddNew = () => {
@@ -32,20 +37,24 @@ export default function CustomerDashboard() {
         </div>
 
         <div>
-          <ViewBill />
+          <ViewBill selectedMonth={selectedMonth} selectedYear={selectedYear} />
         </div>
 
-        <br/>
+        <br />
 
         {/* Charts Section */}
         <div className="max-w-5xl mx-auto space-y-10">
-
           {/* Usage Chart */}
           <div className="bg-white p-6 rounded-2xl shadow-md">
             <h3 className="text-xl font-semibold text-gray-700 mb-4">
               Monthly Usage Overview
             </h3>
-            <UsageChart />
+            <UsageChart
+              selectedMonth={selectedMonth}
+              setSelectedMonth={setSelectedMonth}
+              selectedYear={selectedYear}
+              setSelectedYear={setSelectedYear}
+            />
           </div>
 
           {/* Tariff Chart */}
@@ -55,10 +64,8 @@ export default function CustomerDashboard() {
             </h3>
             <TariffChart />
           </div>
-
         </div>
       </main>
-
     </div>
   );
 }

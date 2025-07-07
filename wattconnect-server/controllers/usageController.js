@@ -39,24 +39,30 @@ exports.getUsage = async (req, res) => {
   }
 };
 
-
 exports.calculateMonthlyBillFromUsage = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { connected_load_kw = 3, fpppa_rate = 0.75, duty_rate = 0.05 } = req.body;
+    const {
+      month,  
+      year, 
+      connected_load_kw = 3,
+      fpppa_rate = 0.75,
+      duty_rate = 0.05
+    } = req.body;
 
-    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59);
+    if (typeof month === 'undefined' || typeof year === 'undefined') {
+      return res.status(400).json({ error: "Month and year are required." });
+    }
 
+    const startOfMonth = new Date(year, month, 1);
+    const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
 
     const usageLogs = await Usage.find({
-      userId: userId,
+      userId,
       date: { $gte: startOfMonth, $lte: endOfMonth }
     });
 
     const total_units = usageLogs.reduce((sum, log) => sum + log.unitsUsed, 0);
-
-    console.log("🧾 Usage Logs for billing:", usageLogs);    
 
     let energy_charge = 0;
     if (total_units <= 120) {
@@ -74,6 +80,8 @@ exports.calculateMonthlyBillFromUsage = async (req, res) => {
     const total_bill = subtotal + duty;
 
     res.json({
+      month: month + 1,
+      year,
       total_units,
       energy_charge: +energy_charge.toFixed(2),
       fpppa: +fpppa.toFixed(2),
