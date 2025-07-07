@@ -51,26 +51,22 @@ function getAllDaysInMonth(year, monthName) {
   return dates;
 }
 
-export default function UsageChart() {
+export default function UsageChart({
+  selectedMonth,
+  setSelectedMonth,
+  selectedYear,
+  setSelectedYear
+}) {
   const { token } = useContext(AuthContext);
   const [usageData, setUsageData] = useState([]);
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-  if (!selectedYear) {
-    const currentYear = new Date().getFullYear();
-    setSelectedYear(String(currentYear));
-  }
-
-  if (!selectedMonth) {
-    const currentMonthIndex = new Date().getMonth();
-    setSelectedMonth(months[currentMonthIndex]);
-  }
-}, [selectedYear, selectedMonth]);
-
+    const now = new Date();
+    if (!selectedYear) setSelectedYear(String(now.getFullYear()));
+    if (!selectedMonth) setSelectedMonth(months[now.getMonth()]);
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -79,35 +75,34 @@ export default function UsageChart() {
       return;
     }
 
-    axios
-      .get("http://localhost:5000/api/usage", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const enriched = res.data.map((entry) => {
-          const dateObj = new Date(entry.date);
-          const year = dateObj.getFullYear();
-          const month = months[dateObj.getMonth()];
-          const dd = String(dateObj.getDate()).padStart(2, "0");
-          const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-          const yyyy = dateObj.getFullYear();
-          const formattedDate = `${dd}-${mm}-${yyyy}`;
+    axios.get("http://localhost:5000/api/usage", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      const enriched = res.data.map((entry) => {
+        const dateObj = new Date(entry.date);
+        const year = dateObj.getFullYear();
+        const month = months[dateObj.getMonth()];
+        const dd = String(dateObj.getDate()).padStart(2, "0");
+        const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const yyyy = dateObj.getFullYear();
+        const formattedDate = `${dd}-${mm}-${yyyy}`;
 
-          return {
-            ...entry,
-            year,
-            month,
-            formattedDate,
-          };
-        });
-
-        setUsageData(enriched);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load usage data.");
-        setLoading(false);
+        return {
+          ...entry,
+          year,
+          month,
+          formattedDate,
+        };
       });
+
+      setUsageData(enriched);
+      setLoading(false);
+    })
+    .catch(() => {
+      setError("Failed to load usage data.");
+      setLoading(false);
+    });
   }, [token]);
 
   const years = Array.from(new Set(usageData.map((entry) => entry.year))).sort();
@@ -127,22 +122,20 @@ export default function UsageChart() {
     }
 
     const units = parseFloat(unitsUsed);
-if (!isNaN(units)) {
-  groupedData[formattedDate][usageType.toLowerCase()] = units;
-}
-
+    if (!isNaN(units)) {
+      groupedData[formattedDate][usageType.toLowerCase()] = units;
+    }
   });
 
   const domesticData = allDates.map((date) => {
-  const val = groupedData[date]?.domestic;
-  return !isNaN(val) ? val : 0;
-});
+    const val = groupedData[date]?.domestic;
+    return !isNaN(val) ? val : 0;
+  });
 
-const commercialData = allDates.map((date) => {
-  const val = groupedData[date]?.commercial;
-  return !isNaN(val) ? val : 0;
-});
-
+  const commercialData = allDates.map((date) => {
+    const val = groupedData[date]?.commercial;
+    return !isNaN(val) ? val : 0;
+  });
 
   const labels = allDates.map((d) => formatDateLabel(d));
 
@@ -188,26 +181,28 @@ const commercialData = allDates.map((date) => {
       <h2 className="text-2xl font-bold mb-4 text-[#226c82] text-center">
         Monthly Usage Chart
       </h2>
+
+      <div className="flex gap-4 justify-center mb-4">
         <select
-  value={selectedYear || ""}
-  onChange={(e) => setSelectedYear(e.target.value)}
-  className="border border-gray-300 px-4 py-2 rounded"
->
-  {years.map((year, index) => (
-    <option key={index} value={String(year)}>{String(year)}</option>
-  ))}
-</select>
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
+          className="border border-gray-300 px-4 py-2 rounded"
+        >
+          {years.map((year, index) => (
+            <option key={index} value={String(year)}>{String(year)}</option>
+          ))}
+        </select>
 
-<select
-  value={selectedMonth || ""}
-  onChange={(e) => setSelectedMonth(e.target.value)}
-  className="border border-gray-300 px-4 py-2 rounded"
->
-  {months.map((month, index) => (
-    <option key={index} value={month}>{month}</option>
-  ))}
-</select>
-
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="border border-gray-300 px-4 py-2 rounded"
+        >
+          {months.map((month, index) => (
+            <option key={index} value={month}>{month}</option>
+          ))}
+        </select>
+      </div>
 
       {datasets.length > 0 ? (
         <Line data={chartData} options={options} />
