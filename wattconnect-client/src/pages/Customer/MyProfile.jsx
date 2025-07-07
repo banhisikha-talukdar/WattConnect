@@ -12,7 +12,8 @@ export default function Profile() {
     email: '',
     consumerNumber: '',
     usageType: '',
-    category: ''
+    category: '',
+    isExistingCustomer: null
   });
   const [originalProfile, setOriginalProfile] = useState({});
   const [error, setError] = useState('');
@@ -56,7 +57,8 @@ export default function Profile() {
           email: userData.email || '',
           consumerNumber: userData.consumerNumber || '',
           usageType: userData.usageType || '',
-          category: userData.category || ''
+          category: userData.category || '',
+          isExistingCustomer: userData.isExistingCustomer
         };
 
         setProfile(profileData);
@@ -86,17 +88,38 @@ export default function Profile() {
   };
 
   const handleSave = async () => {
+    if (profile.isExistingCustomer === true) {
+      if (!profile.consumerNumber || !profile.usageType || !profile.category) {
+        setError('Consumer Number, Usage Type, and Category are required for existing customers.');
+        return;
+      }
+      
+      const isValidConsumerNumber = /^\d{12}$/.test(profile.consumerNumber.trim());
+      if (!isValidConsumerNumber) {
+        setError('Consumer number must be exactly 12 digits.');
+        return;
+      }
+    }
+
     setSaving(true);
     setError('');
 
     try {
       const token = localStorage.getItem('token');
 
+      const updateData = {
+        email: profile.email.trim(),
+        isExistingCustomer: profile.isExistingCustomer,
+        ...(profile.isExistingCustomer === true && {
+          consumerNumber: profile.consumerNumber,
+          usageType: profile.usageType,
+          category: profile.category
+        })
+      };
+
       const response = await axios.put(
         `http://localhost:5000/api/auth/${profile.username}`,
-        {
-          email: profile.email.trim(),
-        },
+        updateData,
         { 
           headers: { Authorization: `Bearer ${token}` } 
         }
@@ -125,6 +148,18 @@ export default function Profile() {
       ...prev, 
       usageType: value,
       category: '' 
+    }));
+  };
+
+  const handleExistingCustomerChange = (value) => {
+    setProfile(prev => ({
+      ...prev,
+      isExistingCustomer: value,
+      ...(value === false && {
+        consumerNumber: '',
+        usageType: '',
+        category: ''
+      })
     }));
   };
 
@@ -189,83 +224,120 @@ export default function Profile() {
               )}
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm text-gray-700 mb-1 font-medium">
-                Consumer Number
-              </label>
-              {editing ? (
-                <input
-                  type="text"
-                  value={profile.consumerNumber}
-                  onChange={(e) => {
-                    const numericValue = e.target.value.replace(/\D/g, '').slice(0, 12);
-                    handleInputChange('consumerNumber', numericValue);
-                  }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#226c82]"
-                  placeholder="12-digit consumer number"
-                  maxLength={12}
-                  
-                />
-              ) : (
-                <div className="bg-gray-50 text-gray-800 px-4 py-2 rounded-md border">
-                  {profile.consumerNumber || 'Not set'}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm text-gray-700 mb-1 font-medium">
-                Usage Type
-              </label>
-              {editing ? (
-                <select
-                  value={profile.usageType}
-                  onChange={(e) => handleUsageTypeChange(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#226c82]"
-                
-                >
-                  <option value="">Select Usage Type</option>
-                  <option value="domestic">Domestic</option>
-                  <option value="commercial">Commercial</option>
-                </select>
-              ) : (
-                <div className="bg-gray-50 text-gray-800 px-4 py-2 rounded-md border">
-                  {profile.usageType ? 
-                    profile.usageType.charAt(0).toUpperCase() + profile.usageType.slice(1) : 
-                    'Not set'
-                  }
-                </div>
-              )}
-            </div>
-
             <div className="mb-4 md:col-span-2">
               <label className="block text-sm text-gray-700 mb-1 font-medium">
-                Category
+                Are you already an existing customer?
               </label>
               {editing ? (
-                profile.usageType ? (
-                  <select
-                    value={profile.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#226c82]"
-                    
-                  >
-                    <option value="">Select Category</option>
-                    {categoryOptions[profile.usageType]?.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500">
-                    Please select a Usage Type first
-                  </div>
-                )
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="existingCustomer"
+                      checked={profile.isExistingCustomer === true}
+                      onChange={() => handleExistingCustomerChange(true)}
+                    />
+                    <span>Yes</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="existingCustomer"
+                      checked={profile.isExistingCustomer === false}
+                      onChange={() => handleExistingCustomerChange(false)}
+                    />
+                    <span>No</span>
+                  </label>
+                </div>
               ) : (
                 <div className="bg-gray-50 text-gray-800 px-4 py-2 rounded-md border">
-                  {profile.category || 'Not set'}
+                  {profile.isExistingCustomer === null ? 'Not set' : 
+                   profile.isExistingCustomer ? 'Yes' : 'No'}
                 </div>
               )}
             </div>
+
+            {(profile.isExistingCustomer === true || (!editing && profile.consumerNumber)) && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-700 mb-1 font-medium">
+                    Consumer Number
+                  </label>
+                  {editing ? (
+                    <input
+                      type="text"
+                      value={profile.consumerNumber}
+                      onChange={(e) => {
+                        const numericValue = e.target.value.replace(/\D/g, '').slice(0, 12);
+                        handleInputChange('consumerNumber', numericValue);
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#226c82]"
+                      placeholder="12-digit consumer number"
+                      maxLength={12}
+                      required={profile.isExistingCustomer === true}
+                    />
+                  ) : (
+                    <div className="bg-gray-50 text-gray-800 px-4 py-2 rounded-md border">
+                      {profile.consumerNumber || 'Not set'}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-700 mb-1 font-medium">
+                    Usage Type
+                  </label>
+                  {editing ? (
+                    <select
+                      value={profile.usageType}
+                      onChange={(e) => handleUsageTypeChange(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#226c82]"
+                      required={profile.isExistingCustomer === true}
+                    >
+                      <option value="">Select Usage Type</option>
+                      <option value="domestic">Domestic</option>
+                      <option value="commercial">Commercial</option>
+                    </select>
+                  ) : (
+                    <div className="bg-gray-50 text-gray-800 px-4 py-2 rounded-md border">
+                      {profile.usageType ? 
+                        profile.usageType.charAt(0).toUpperCase() + profile.usageType.slice(1) : 
+                        'Not set'
+                      }
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-4 md:col-span-2">
+                  <label className="block text-sm text-gray-700 mb-1 font-medium">
+                    Category
+                  </label>
+                  {editing ? (
+                    profile.usageType ? (
+                      <select
+                        value={profile.category}
+                        onChange={(e) => handleInputChange('category', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#226c82]"
+                        required={profile.isExistingCustomer === true}
+                      >
+                        <option value="">Select Category</option>
+                        {categoryOptions[profile.usageType]?.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500">
+                        Please select a Usage Type first
+                      </div>
+                    )
+                  ) : (
+                    <div className="bg-gray-50 text-gray-800 px-4 py-2 rounded-md border">
+                      {profile.category || 'Not set'}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 mt-6">
