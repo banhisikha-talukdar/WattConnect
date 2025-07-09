@@ -9,6 +9,7 @@ const { verifyToken } = require("../middleware/auth");
 const {
   submitApplication,
   getApplications,
+  updateApplicationStatus,
 } = require("../controllers/newConnectionController");
 
 const uploadPath = path.join(__dirname, "..", "uploads", "applications");
@@ -46,5 +47,7 @@ router.post(
 );
 
 router.get("/all", verifyToken, getApplications);
+
+router.put("/:applicationId/status", verifyToken, updateApplicationStatus);
 
 module.exports = router;

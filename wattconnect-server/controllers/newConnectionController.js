@@ -58,7 +58,35 @@ const getApplications = async (req, res) => {
   }
 };
 
+const updateApplicationStatus = async (req, res) => {
+  const { applicationId } = req.params;
+  const { status } = req.body;
+
+  if (!["Pending", "Approved", "Rejected"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status value" });
+  }
+
+  try {
+    const updated = await NewConnection.findByIdAndUpdate(
+      applicationId,
+      { status },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    res.json({ message: "Application status updated", application: updated });
+  } catch (err) {
+    console.error("❌ Error updating status:", err);
+    res.status(500).json({ error: "Server error updating status" });
+  }
+};
+
+
 module.exports = {
   submitApplication,
   getApplications,
+  updateApplicationStatus,
 };
