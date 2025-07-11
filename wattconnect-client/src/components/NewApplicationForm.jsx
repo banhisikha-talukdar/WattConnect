@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Upload, X, FileText, CheckCircle, RotateCcw, Eye, ArrowLeft } from 'lucide-react';
 
 export default function NewApplication() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     district: '',
     subdivision: '',
@@ -60,22 +63,80 @@ export default function NewApplication() {
     ]
   };
 
+  const loadCategories = [
+    { code: '43', name: 'LT I JEEVAN DHARA (DOMESTIC)', minLoad: 0.01, maxLoad: 0.5 },
+    { code: '44', name: 'LT I JEEVAN DHARA (COMMERCIAL)', minLoad: 0.01, maxLoad: 0.5 },
+    { code: '45', name: 'LT I JEEVAN DHARA (GENERAL)', minLoad: 0.01, maxLoad: 0.5 },
+    { code: '46', name: 'LT II DOMESTIC A', minLoad: 0.06, maxLoad: 4.99 },
+    { code: '47', name: 'LT III DOMESTIC B', minLoad: 5.0, maxLoad: 30.0 },
+    { code: '48', name: 'LT IV COMMERCIAL', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '49', name: 'LT V(A) GENERAL PURPOSE (OTHER)', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '51', name: 'LT VII AGRICULTURE', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '52', name: 'LT VIII SMALL INDUSTRIES (RURAL)', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '53', name: 'LT VIII SMALL INDUSTRIES (URBAN)', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '54', name: 'LT IX TEMPORARY SUPPLY (DOMESTIC)', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '55', name: 'LT IX TEMPORARY SUPPLY (NON DOMESTIC)', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '69', name: 'LT IX TEMPORARY SUPPLY (AGRICULTURE)', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '72', name: 'LT ELECTRIC VEHICLES CHARGING', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '75', name: 'LT V(B) GENERAL PURPOSE (EDUCATION)', minLoad: 0.1, maxLoad: 30.0 },
+    { code: '56-77', name: 'HT Categories (For Online applications)', minLoad: 30, maxLoad: 150 }
+  ];
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
 
-  const categories = ['Domestic', 'Commercial'];
+  const getSelectedCategory = () => {
+    return loadCategories.find(cat => cat.code === formData.appliedCategory);
+  };
+
+  const validateLoadRange = (load) => {
+    const selectedCategory = getSelectedCategory();
+    if (!selectedCategory) return true;
+    
+    const numLoad = parseFloat(load);
+    return numLoad >= selectedCategory.minLoad && numLoad <= selectedCategory.maxLoad;
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    if (name === 'appliedCategory') {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        appliedLoad: '' 
+      }));
+      setErrors((prev) => ({ ...prev, appliedLoad: '' }));
+    } else if (name === 'appliedLoad') {
+      const selectedCategory = getSelectedCategory();
+      if (selectedCategory && value) {
+        const numLoad = parseFloat(value);
+        if (!validateLoadRange(value)) {
+          setErrors((prev) => ({
+            ...prev,
+            appliedLoad: `Load must be between ${selectedCategory.minLoad} and ${selectedCategory.maxLoad} KW for this category`
+          }));
+        } else {
+          setErrors((prev) => ({ ...prev, appliedLoad: '' }));
+        }
+      }
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
+    
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
+
 
   const handleFileChange = (e, fileType) => {
     const file = e.target.files[0];
@@ -117,6 +178,11 @@ export default function NewApplication() {
 
     if (!formData.appliedLoad || isNaN(formData.appliedLoad) || formData.appliedLoad <= 0) {
       newErrors.appliedLoad = 'Applied load must be a positive number';
+    } else if (!validateLoadRange(formData.appliedLoad)) {
+      const selectedCategory = getSelectedCategory();
+      if (selectedCategory) {
+        newErrors.appliedLoad = `Load must be between ${selectedCategory.minLoad} and ${selectedCategory.maxLoad} KW for this category`;
+      }
     }
 
     const requiredFiles = ['identityProof', 'addressProof', 'legalOccupationProof', 'testReport', 'passportPhoto', 'affidavitOrNOC', 'agreementForm'];
@@ -191,6 +257,9 @@ export default function NewApplication() {
 
       setSubmitStatus("Application submitted successfully!");
       console.log("Submitted:", result);
+
+      setSubmitStatus("success");
+
     } catch (err) {
       console.error("Submission error:", err);
       setSubmitStatus(`Submission failed: ${err.message}`);
@@ -277,6 +346,20 @@ export default function NewApplication() {
   );
 
   return (
+    submitStatus === "success" ? (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 text-center px-4">
+      <CheckCircle className="w-16 h-16 text-green-600 mb-4" />
+      <h1 className="text-3xl font-bold text-green-800 mb-2">
+        Your application has been submitted successfully!
+      </h1>
+      <button
+        onClick={() => navigate("/customer/dashboard")}
+        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+      >
+        OK
+      </button>
+    </div>
+  ) : (
     <form onSubmit={handleSubmit} className="min-h-screen w-full bg-gray-50 py-6 px-6 overflow-y-auto">
 
       <div className="flex justify-end mb-4">
@@ -350,8 +433,8 @@ export default function NewApplication() {
               className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">Select category</option>
-              {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
+              {loadCategories.map((cat) => (
+                <option key={cat.code} value={cat.code}>{cat.name}</option>
               ))}
             </select>
             {errors.appliedCategory && (
@@ -371,15 +454,25 @@ export default function NewApplication() {
               </a>
               </div>
             <input
+              type="number"
+              step="0.01"
               name="appliedLoad"
               value={formData.appliedLoad}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded-md"
-              placeholder="Enter load"
+              min={getSelectedCategory()?.minLoad || 0}
+              max={getSelectedCategory()?.maxLoad || 150}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={getSelectedCategory() ? `Range: ${getSelectedCategory().minLoad} - ${getSelectedCategory().maxLoad} KW` : "Select category first"}
+              disabled={!formData.appliedCategory}
             />
               {errors.appliedLoad && (
               <p className="text-red-500 text-xs mt-1">{errors.appliedLoad}</p>
                )}
+              {getSelectedCategory() && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Allowed range: {getSelectedCategory().minLoad} - {getSelectedCategory().maxLoad} KW
+                </p>
+              )}
             </div>
             </div>
           </div>
@@ -463,8 +556,8 @@ export default function NewApplication() {
               <FileUpload label="Residential Address Proof (DL / Bank Passbook / Aadhaar / Ration Card / Passport / Electricity Bill / Local Certificate)" fileType="addressProof" />
               <FileUpload label="Proof of Legal Occupation (Holding No., Lease/Rent/Sale Deed)" fileType="legalOccupationProof" />
               <FileUpload label="Test Report from Electrical Contractor/Supervisor" fileType="testReport" />
-              <FileUpload label="Latest Passport Size passportPhoto of the Applicant (jpeg, jpg or png)" fileType="passportPhoto" />
-              <FileUpload label="affidavitOrNOC from land owner with No Objection and optional Indemnity Bond (if not owner)" fileType="affidavitOrNOC" />
+              <FileUpload label="Latest Passport Size Photo of the Applicant (jpeg, jpg or png)" fileType="passportPhoto" />
+              <FileUpload label="Affidavit from land owner with No Objection and optional Indemnity Bond (if not owner)" fileType="affidavitOrNOC" />
               <FileUpload label="Standard Agreement Form" fileType="agreementForm" />
               <FileUpload label="Additional Documents for Online HT Connection" fileType="htAdditionalDocs" required={false} />
             </div>
@@ -550,5 +643,6 @@ export default function NewApplication() {
         </div>
       </div>
     </form>
+    )
   );
 }
