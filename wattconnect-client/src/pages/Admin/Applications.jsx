@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Navbar from '../../components/Navbar';
 import { Eye, Check, X, FileText, Download, User, MapPin, Calendar, ArrowLeft } from 'lucide-react';
+import { AuthContext } from "../../context/AuthContext";
 
 export default function Applications() {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     fetchApplications();
@@ -15,13 +17,13 @@ export default function Applications() {
     try {
       const response = await fetch('http://localhost:5000/api/new-connection/all', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       
       if (response.ok) {
         const data = await response.json();
-        setApplications(data);
+        setApplications(data.filter(app => app.status === "Pending")); // ✅ Show only pending
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
@@ -35,7 +37,7 @@ export default function Applications() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
