@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Navbar from '../../components/Navbar';
-import { Eye, Check, X, FileText, Download, User, MapPin, Calendar, ArrowLeft } from 'lucide-react';
+import { Eye, Check, X, FileText, Download, User, MapPin, Calendar, ArrowLeft} from 'lucide-react';
+import { AuthContext } from "../../context/AuthContext";
 
 export default function Applications() {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     fetchApplications();
@@ -15,18 +18,25 @@ export default function Applications() {
     try {
       const response = await fetch('http://localhost:5000/api/new-connection/all', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       
       if (response.ok) {
         const data = await response.json();
-        setApplications(data);
+        setApplications(data.filter(app => app.status === "Pending")); // ✅ Show only pending
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
     } 
   };
+
+  const filteredApplications = searchTerm.trim()
+  ? applications.filter(app =>
+      app.status === 'Pending' &&
+      String(app._id) === searchTerm.trim()
+    )
+  : applications;
 
   const handleStatusUpdate = async (applicationId, newStatus) => {
     setProcessing(true);
@@ -35,7 +45,7 @@ export default function Applications() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -228,6 +238,20 @@ export default function Applications() {
     <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="admin" />
       <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+        <div className="mb-6 flex justify-center">
+          <div className="flex gap-2 w-full max-w-xl">
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="Search by Application ID"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value.replace(/\D/g, ''))} 
+              className="flex-1 border border-gray-300 rounded-full px-4 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-gray-500"
+            />
+          </div>
+        </div>
+
         <h1 className="text-2xl font-bold mb-6">New Connection Applications</h1>
         
         {applications.length === 0 ? (
@@ -260,7 +284,7 @@ export default function Applications() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {applications.map((app) => (
+                {filteredApplications.map((app) => (
                   <tr key={app._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">

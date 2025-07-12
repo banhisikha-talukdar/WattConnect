@@ -1,0 +1,35 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - inform_bill
+  - inform_usage
+
+entities:
+  - bill
+  - ac_hours
+  - heater
+  - people
+
+slots:
+  bill:
+    type: float
+    influence_conversation: true
+  ac_hours:
+    type: float
+  heater:
+    type: text
+  people:
+    type: float
+
+responses:
+  utter_greet:
+    - text: "Hello! I’m here to help you save on your electricity bill. How much was your bill this month (in ₹)?"
+  utter_ask_usage:
+    - text: "Thanks. Now tell me about your usage:\n- AC hours/day?\n- Heater used (yes/no)?\n- Number of people in house?"
+  utter_goodbye:
+    - text: "Thanks for using WattConnect's Energy Assistant! Stay efficient 🔌"
+
+actions:
+  - action_provide_static_tips

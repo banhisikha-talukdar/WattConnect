@@ -82,7 +82,7 @@ export default function EngineerSchedule() {
   };
 
   const handleNoConsumer = () => {
-    navigate("/customer/new-application");
+    navigate("/customer/dashboard");
   };
 
   return (

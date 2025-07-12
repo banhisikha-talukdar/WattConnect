@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { AuthContext } from "../context/AuthContext";
 import { Upload, X, FileText, CheckCircle, RotateCcw, Eye, ArrowLeft } from 'lucide-react';
 
 export default function NewApplication() {
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(token ? "/customer/dashboard" : "/");
+  };
 
   const [formData, setFormData] = useState({
     district: '',
@@ -352,19 +357,32 @@ export default function NewApplication() {
       <h1 className="text-3xl font-bold text-green-800 mb-2">
         Your application has been submitted successfully!
       </h1>
-      <button
-        onClick={() => navigate("/customer/dashboard")}
-        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-      >
-        OK
-      </button>
+      <div className="flex flex-col sm:flex-row gap-4 mt-6">
+        <button
+          onClick={() => navigate("/new-connection-form")}
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+        >
+          Apply for another connection
+        </button>
+        <button
+          onClick={() => window.open("/track-my-application", "_blank", "noopener,noreferrer")}
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+        >
+          Track my application
+        </button>
+        <button onClick={handleGoBack}
+          className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+        >
+          Go back
+        </button>
+      </div>
     </div>
   ) : (
     <form onSubmit={handleSubmit} className="min-h-screen w-full bg-gray-50 py-6 px-6 overflow-y-auto">
 
       <div className="flex justify-end mb-4">
         <Link
-          to="/customer/new-application"
+          to="/new-application"
           className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />

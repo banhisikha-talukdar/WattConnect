@@ -27,7 +27,6 @@ export default function Navbar({ type }) {
     { name: 'Meter Scheduling', icon: <CalendarClock size={20} />, path: '/admin/meter-scheduling' },
   ] : [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/customer/dashboard' },
-    { name: 'New Application', icon: <FileText size={20} />, path: '/customer/new-application' },
     { name: 'Tips & Insights', icon: <FileBarChart size={20} />, path: '/customer/tips-insights' },
     { name: 'Schedule my engineer', icon: <Wrench size={20} />, path: '/customer/my-engineer-scheduling' },
     { name: 'Schedule my meter', icon: <CalendarClock size={20} />, path: '/customer/my-meter-scheduling' },

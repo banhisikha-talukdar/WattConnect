@@ -5,11 +5,12 @@ import NewApplicationForm from './components/NewApplicationForm';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import NewApplication from './pages/NewApplication';
+import TrackMyApplication from './pages/TrackMyApplication';
 
 // Customer Pages
 import CustomerDashboard from './pages/Customer/Dashboard';
 import AddEntry from './pages/Customer/AddEntry';
-import NewApplication from './pages/Customer/NewApplication';
 import TipsnInsights from './pages/Customer/TipsnInsights';
 import EngineerSchedule from './pages/Customer/EngineerSchedule';
 import MeterSchedule from './pages/Customer/MeterSchedule';
@@ -32,11 +33,12 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/new-application" element={<NewApplication />}/>
+          <Route path="/new-connection-form" element={<NewApplicationForm />} />
+          <Route path="/track-my-application" element={<TrackMyApplication />} />
 
           <Route path="/customer/dashboard" element={<CustomerDashboard />}/>
           <Route path="/customer/add" element={<AddEntry />} />
-          <Route path="/customer/new-application" element={<NewApplication />}/>
-          <Route path="/customer/new-connection-form" element={<NewApplicationForm />} />
           <Route path="/customer/tips-insights" element={<TipsnInsights />}/>
           <Route path="/customer/my-engineer-scheduling" element={<EngineerSchedule />} />
           <Route path="/customer/my-meter-scheduling" element={<MeterSchedule />} />
