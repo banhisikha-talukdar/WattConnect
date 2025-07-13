@@ -4,6 +4,7 @@ import { useState } from "react";
 import TariffChart from "../../components/TariffChart";
 import UsageChart from "../../components/UsageChart";
 import ViewBill from "../../components/ViewBill";
+import Chatbot from "../../components/Chatbot";
 
 const username = "Customer";
 
@@ -65,6 +66,7 @@ export default function CustomerDashboard() {
             <TariffChart />
           </div>
         </div>
+        <Chatbot />
       </main>
     </div>
   );
