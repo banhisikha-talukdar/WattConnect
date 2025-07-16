@@ -365,11 +365,11 @@ export default function NewApplication() {
           Apply for another connection
         </button>
         <button
-          onClick={() => window.open("/track-my-application", "_blank", "noopener,noreferrer")}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-        >
-          Track my application
-        </button>
+        onClick={() => window.open("/track-my-application", "_blank", "noopener,noreferrer")}
+        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+      >
+        Track my application
+      </button>
         <button onClick={handleGoBack}
           className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
         >
