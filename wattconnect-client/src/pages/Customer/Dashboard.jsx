@@ -5,9 +5,8 @@ import axios from "axios";
 import TariffChart from "../../components/TariffChart";
 import UsageChart from "../../components/UsageChart";
 import ViewBill from "../../components/ViewBill";
-import Chatbot from "../../components/Chatbot";
-import NewApplicationButton from "../../components/NewApplicationbutton";
-import { AuthContext } from "../../context/AuthContext"
+
+const username = "Customer";
 
 export default function CustomerDashboard() {
   const currentDate = new Date();

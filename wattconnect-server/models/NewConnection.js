@@ -8,6 +8,9 @@ const newApplicationSchema = new mongoose.Schema({
   appliedCategory: { type: String, required: true }, 
   appliedLoad: { type: Number, required: true },
 
+  appId: { type: String, unique: true },
+  consumerNo: { type: String, unique: true },
+
   consumerDetails: {
     name: String,
     fatherName: String,

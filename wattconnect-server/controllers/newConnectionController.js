@@ -1,5 +1,9 @@
 const NewConnection = require("../models/NewConnection");
 
+function generateAppId(length = 12) {
+  return Math.floor(Math.random() * Math.pow(10, length)).toString().padStart(length, '0');
+}
+
 const submitApplication = async (req, res) => {
   try {
     const {
@@ -11,12 +15,24 @@ const submitApplication = async (req, res) => {
       addressDetails,
     } = req.body;
 
+    let appId, unique = false;
+
+    while (!unique) {
+      const candidate = generateAppId();
+      const exists = await NewConnection.findOne({ appId: candidate });
+      if (!exists) {
+        appId = candidate;
+        unique = true;
+      }
+    }
+
     const uploads = req.files || {};
 
     const newForm = new NewConnection({
       userId: req.user.userId,
       district,
       subdivision,
+      appId,
       appliedCategory,
       appliedLoad,
       consumerDetails,
