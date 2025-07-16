@@ -6,7 +6,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import NewApplication from './pages/NewApplication';
-import TrackMyApplication from './pages/TrackMyApplication';
+import TrackMyApplication from './pages/TrackMyapplication';
 
 // Customer Pages
 import CustomerDashboard from './pages/Customer/Dashboard';
@@ -35,7 +35,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/new-application" element={<NewApplication />}/>
           <Route path="/new-connection-form" element={<NewApplicationForm />} />
-          <Route path="/track-my-application" element={<TrackMyApplication />} />
+          <Route path="/track-my-application" element={<TrackMyApplication />}/>
 
           <Route path="/customer/dashboard" element={<CustomerDashboard />}/>
           <Route path="/customer/add" element={<AddEntry />} />

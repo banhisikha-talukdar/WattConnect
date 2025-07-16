@@ -1,74 +1,72 @@
-import { useState, useEffect, useContext } from 'react';
-import { Calendar, MapPin, AlertCircle, CheckCircle, XCircle, Clock} from 'lucide-react';
-import { AuthContext } from '../context/AuthContext'; 
+import { useState, useEffect } from 'react';
+import { Calendar, MapPin, AlertCircle, CheckCircle, XCircle, Clock } from 'lucide-react';
 
-export default function TrackMyApplication() {
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { token } = useContext(AuthContext);
+export default function TrackMyApplication(){
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUserApplications();
-  }, []);
+    useEffect(() => {
+        fetchUserApplications();
+    }, []);
 
-  const fetchUserApplications = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/new-connection/all', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const fetchUserApplications = async () => {
+        try {
+        const response = await fetch('http://localhost:5000/api/new-connection/all', {
+            headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        const token = localStorage.getItem('token');
-        const userId = JSON.parse(atob(token.split('.')[1])).userId; 
-        
-        const userApplications = data.filter(app => 
-          app.userId && app.userId._id === userId
-        );
-        setApplications(userApplications);
-      }
-    } catch (error) {
-      console.error('Error fetching applications:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (response.ok) {
+            const data = await response.json();
+            const token = localStorage.getItem('token');
+            const userId = JSON.parse(atob(token.split('.')[1])).userId; 
+            
+            const userApplications = data.filter(app => 
+            app.userId && app.userId._id === userId
+            );
+            setApplications(userApplications);
+        }
+        } catch (error) {
+        console.error('Error fetching applications:', error);
+        } finally {
+        setLoading(false);
+        }
+    };
 
-  const getStatusIcon = (status) => {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'rejected':
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      case 'pending':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      default:
-        return <AlertCircle className="h-5 w-5 text-gray-500" />;
-    }
-  };
+    const getStatusIcon = (status) => {
+        switch (status.toLowerCase()) {
+        case 'approved':
+            return <CheckCircle className="h-5 w-5 text-green-500" />;
+        case 'rejected':
+            return <XCircle className="h-5 w-5 text-red-500" />;
+        case 'pending':
+            return <Clock className="h-5 w-5 text-yellow-500" />;
+        default:
+            return <AlertCircle className="h-5 w-5 text-gray-500" />;
+        }
+    };
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'approved': return 'bg-green-50 border-green-200 text-green-800';
-      case 'rejected': return 'bg-red-50 border-red-200 text-red-800';
-      case 'pending': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      default: return 'bg-gray-50 border-gray-200 text-gray-800';
-    }
-  };
+    const getStatusColor = (status) => {
+        switch (status.toLowerCase()) {
+        case 'approved': return 'bg-green-50 border-green-200 text-green-800';
+        case 'rejected': return 'bg-red-50 border-red-200 text-red-800';
+        case 'pending': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+        default: return 'bg-gray-50 border-gray-200 text-gray-800';
+        }
+    };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+        });
+    };
 
-    return(
+    return (
         <section className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-semibold mb-4">Your Applications Status</h2>
           
@@ -118,7 +116,7 @@ export default function TrackMyApplication() {
                         <div className="mt-3 p-3 bg-green-100 rounded-md">
                           <p className="text-sm text-green-800">
                             <CheckCircle className="h-4 w-4 inline mr-1" />
-                            Your application has been approved.
+                            Congratulations! Your application has been approved.
                           </p>
                         </div>
                       )}

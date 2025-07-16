@@ -1,15 +1,10 @@
-import { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from "../context/AuthContext";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Upload, X, FileText, CheckCircle, RotateCcw, Eye, ArrowLeft } from 'lucide-react';
 
-export default function NewApplication() {
-  const { token } = useContext(AuthContext);
+export default function NewApplicationForm() {
   const navigate = useNavigate();
-
-  const handleGoBack = () => {
-    navigate(token ? "/customer/dashboard" : "/");
-  };
 
   const [formData, setFormData] = useState({
     district: '',
@@ -354,29 +349,34 @@ export default function NewApplication() {
     submitStatus === "success" ? (
     <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 text-center px-4">
       <CheckCircle className="w-16 h-16 text-green-600 mb-4" />
-      <h1 className="text-3xl font-bold text-green-800 mb-2">
+      <h1 className="text-3xl font-bold text-green-800 mb-6">
         Your application has been submitted successfully!
       </h1>
-      <div className="flex flex-col sm:flex-row gap-4 mt-6">
+
+      <div className="flex flex-col gap-4 w-full max-w-sm">
         <button
           onClick={() => navigate("/new-connection-form")}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+          className="bg-green-600 hover:bg-[#d4b42b] text-white font-semibold px-6 py-3 rounded-lg transition-colors"
         >
           Apply for another connection
         </button>
+
         <button
-        onClick={() => window.open("/track-my-application", "_blank", "noopener,noreferrer")}
-        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-      >
-        Track my application
-      </button>
-        <button onClick={handleGoBack}
-          className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+          onClick={() => navigate("/track-my-application")}
+          className="bg-blue-600 hover:bg-[#425bbd] text-white font-semibold px-6 py-3 rounded-lg transition-colors"
         >
-          Go back
+          Track submitted application
+        </button>
+
+        <button
+          onClick={() => navigate("/new-application")}
+          className="bg-gray-600 hover:bg-[#57c43b] text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+        >
+          OK
         </button>
       </div>
     </div>
+
   ) : (
     <form onSubmit={handleSubmit} className="min-h-screen w-full bg-gray-50 py-6 px-6 overflow-y-auto">
 

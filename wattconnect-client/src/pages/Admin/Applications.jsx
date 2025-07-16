@@ -1,11 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
 import Navbar from '../../components/Navbar';
-import { Eye, Check, X, FileText, Download, User, MapPin, Calendar, ArrowLeft } from 'lucide-react';
+import { Eye, Check, X, FileText, Download, User, MapPin, Calendar, ArrowLeft} from 'lucide-react';
+import { AuthContext } from "../../context/AuthContext";
 
 export default function Applications() {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     fetchApplications();

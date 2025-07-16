@@ -32,7 +32,7 @@ const Landing = () => {
       <div className="relative min-h-screen">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          <img src={heroImage} alt="Hero Background" className="w-full h-full object-cover"/>
+          <img src={heroImage} alt="Hero Background"  className="w-full h-full object-cover"/>
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#b0daf2]" />
         </div>
 
@@ -60,12 +60,6 @@ const Landing = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to="/new-application"
-                className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-black bg-white hover:bg-gray-300 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Apply for New Connection
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
               <Link
                 to="/signup"
                 className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-400 to-[#2550da] hover:from-blue-300 hover:to-blue-400 hover:text-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -73,7 +67,16 @@ const Landing = () => {
                 Get Started Today
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
+
+              <Link
+                to="/new-application"
+                className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-blue-700 bg-white hover:bg-blue-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                Apply for New Connection
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
+
           </section>
         </div>
       </div>
