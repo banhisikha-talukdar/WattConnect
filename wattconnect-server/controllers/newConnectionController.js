@@ -49,11 +49,12 @@ const submitApplication = async (req, res) => {
       },
     });
 
-    await newForm.save();
+    const savedApplication = await newForm.save();
 
     res.status(201).json({
       message: "Application submitted successfully",
-      data: newForm,
+      applicationId: savedApplication._id,
+      appId: savedApplication.appId,
     });
   } catch (error) {
     console.error("❌ Error submitting new connection:", error);
