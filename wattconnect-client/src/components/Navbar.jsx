@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useContext, useEffect  } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import {
   LayoutDashboard,
   FileText,
@@ -14,11 +15,21 @@ import {
 
 export default function Navbar({ type }) {
   const navigate = useNavigate();
+  const { token, logout } = useContext(AuthContext);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-  const handleLogout = () => navigate('/');
+  const handleLogout = () => {
+      logout(); 
+      navigate("/");
+  };
+
+  useEffect(() => {
+      if (!token) {
+        navigate("/");
+    }
+  }, [token, navigate]);
 
   const links = type === 'admin' ? [
     { name: 'Home', icon: <Home size={20} />, path: '/admin/home' },

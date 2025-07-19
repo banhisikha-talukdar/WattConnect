@@ -24,19 +24,23 @@ export default function TrackMyApplication() {
 
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
-      case 'approved': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'rejected': return <XCircle className="h-5 w-5 text-red-500" />;
-      case 'pending': return <Clock className="h-5 w-5 text-yellow-500" />;
+      case 'fme_approved': return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'connection_approved': return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'fme_rejected': return <XCircle className="h-5 w-5 text-red-500" />;
+      case 'pending_admin_forward': return <Clock className="h-5 w-5 text-yellow-500" />;
+      case 'pending_fme_action': return <Clock className="h-5 w-5 text-yellow-500" />;
       default: return <AlertCircle className="h-5 w-5 text-gray-500" />;
     }
   };
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case 'approved': return 'bg-green-50 border-green-200 text-green-800';
-      case 'rejected': return 'bg-red-50 border-red-200 text-red-800';
-      case 'pending': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      default: return 'bg-gray-50 border-gray-200 text-gray-800';
+      case 'pending_admin_forward': return 'bg-[#d6e31c] border-orange-200 text-black';
+      case 'pending_fme_action': return 'bg-[#dfa820] border-yellow-200 text-black';
+      case 'fme_rejected': return 'bg-red-50 border-red-200 text-black';
+      case 'fme_approved': return 'bg-[#7ed22d] border-blue-200 text-black';
+      case 'connection_approved': return 'bg-green-50 border-green-200 text-black';
+      default: return 'bg-gray-50 border-gray-200 text-black';
     }
   };
 

@@ -24,6 +24,9 @@ import Applications from './pages/Admin/Applications';
 import EngineerScheduling from './pages/Admin/EngineerScheduling';
 import MeterScheduling from './pages/Admin/MeterScheduling';
 
+// Engineer Page
+import PendingApplications from './pages/Engineer/PendingApplications';
+
 function App() {
   return (
     <Router>
@@ -50,6 +53,8 @@ function App() {
           <Route path="/admin/applications" element={<Applications />} />
           <Route path="/admin/engineer-scheduling" element={<EngineerScheduling />} />
           <Route path="/admin/meter-scheduling" element={<MeterScheduling />} />
+
+          <Route path="/engineer/pending-applications" element={<PendingApplications />}/>
         </Routes>
         </div>
         {/* Always show footer */}

@@ -108,7 +108,7 @@ export default function AuthForm({ mode }) {
         if (isExistingCustomer === true) {
           navigate("/customer/dashboard");
         } else {
-          navigate("/customer/new-application");
+          navigate("/customer/dashboard");
         }
       } else if (mode === "login") {
         if (data.user?.role !== formData.role) {
@@ -117,11 +117,15 @@ export default function AuthForm({ mode }) {
         }
         else if (data.user?.role === "admin" && formData.role === "admin") {
           navigate("/admin/home");
+        }else if (data.user?.role === "engineer" && formData.role === "engineer") {
+          navigate("/engineer/pending-applications");
         } else {
           navigate("/customer/dashboard");
         }
       } else if (formData.role === "admin") {
         navigate("/admin/home");
+      } else if (formData.role === "engineer") {
+        navigate("/engineer/pending-applications");
       } else {
         navigate("/customer/dashboard");
       }
@@ -197,6 +201,7 @@ export default function AuthForm({ mode }) {
       >
         <option value="customer">Customer</option>
         <option value="admin">Admin</option>
+        <option value="engineer">Engineer</option>
       </select>
 
       {mode === "signup" && formData.role === "customer" && (

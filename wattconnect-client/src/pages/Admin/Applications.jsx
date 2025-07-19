@@ -11,6 +11,9 @@ export default function Applications() {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [fmes, setFmes] = useState([]);
+  const [selectedFme, setSelectedFme] = useState(null);
+  const [showFmeDialog, setShowFmeDialog] = useState(false);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -24,28 +27,29 @@ export default function Applications() {
           Authorization: `Bearer ${token}`,
         },
       });
-      setApplications(res.data.filter(app => app.status === "Pending"));
+      setApplications(res.data.filter(app => app.status === "pending_admin_forward"));
     } catch (error) {
       console.error('Error fetching applications:', error);
     }
   };
 
+  const fetchFMEs = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/fmes', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFmes(Array.isArray(res.data) ? res.data : []);
+      setShowFmeDialog(true);
+    } catch (error) {
+      console.error('Error fetching FMEs:', error);
+      alert("Failed to load FMEs");
+    }
+  };
+
+
   const handleStatusUpdate = async (application, newStatus) => {
     setProcessing(true);
     try {
-      if (newStatus === 'Approved') {
-  const res = await axios.put(`http://localhost:5000/api/approve-new-connection/${application.appId}`);
-  const updatedApp = { ...application, status: "Approved", consumerNumber: res.data.consumerNumber };
-  
-  setApplications(prev =>
-    prev.map(app =>
-      app._id === application._id ? updatedApp : app
-    )
-  );
-  setSelectedApp(null);
-  return;
-}
-
       await axios.put(
         `http://localhost:5000/api/new-connection/${application.appId}/status`,
         { status: newStatus },
@@ -182,22 +186,67 @@ export default function Applications() {
                 Go Back
               </button>
               <button
-                onClick={() => handleStatusUpdate(application, 'Rejected')}
+                onClick={() => fetchFMEs()}
                 disabled={processing}
-                className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 flex items-center"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Reject
-              </button>
-              <button
-                onClick={() => handleStatusUpdate(application, 'Approved')}
-                disabled={processing}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 flex items-center"
-              >
+                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 flex items-center">
                 <Check className="h-4 w-4 mr-2" />
-                Approve
+                Select FME
               </button>
             </div>
+
+            {/* FME Assignment Dialog */}
+            {showFmeDialog && (
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+                <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300" onClick={(e) => e.stopPropagation()}>
+                  <h2 className="text-2xl font-bold mb-4">Assign FME</h2>
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                    {fmes.map((fme) => (
+                      <div
+                        key={fme._id}
+                        className={`p-4 border rounded cursor-pointer ${
+                          selectedFme && selectedFme._id === fme._id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'hover:border-gray-400'
+                        }`}
+                        onClick={() => setSelectedFme(fme)}
+                      >
+                        <p className="font-semibold text-lg">{fme.name}</p>
+                        <p>Employee ID: {fme.employeeId}</p>
+                        <p>Contact: {fme.contactNumber}</p>
+                        <p>Email: {fme.email}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-end gap-4 mt-6">
+                    <button
+                      className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                      onClick={() => {
+                        setShowFmeDialog(false);
+                        setSelectedFme(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      disabled={!selectedFme}
+                      onClick={async () => {
+                        if (!selectedFme) {
+                          alert("Please select an FME before forwarding.");
+                          return;
+                        }
+                        await handleStatusUpdate(application, 'pending_fme_action');
+                        setShowFmeDialog(false);
+                        setSelectedFme(null);
+                      }}
+                    >
+                      Forward to FME
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
