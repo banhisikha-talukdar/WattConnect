@@ -4,20 +4,18 @@ import { AuthContext } from "../../context/AuthContext";
 
 export default function PendingApplications() {
     const navigate = useNavigate();
-    // const { token, logout } = useContext(AuthContext);
+    const { token, logout } = useContext(AuthContext);
 
-    // const handleLogout = () => {
-    //     logout(); 
-    //     navigate("/");
-    // };
+    const handleLogout = () => {
+        logout(); 
+        navigate("/");
+    };
 
-    // useEffect(() => {
-    //     if (!token) {
-    //         navigate("/");
-    //     }
-    // }, [token, navigate]);
-
-    const handleLogout = () => navigate("/");
+    useEffect(() => {
+        if (!token) {
+            navigate("/");
+        }
+    }, [token, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

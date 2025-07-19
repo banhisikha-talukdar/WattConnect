@@ -117,7 +117,7 @@ export default function TrackMyApplication() {
                       <span>Submitted: {formatDate(filteredApp.submittedAt)}</span>
                     </div>
 
-                    {filteredApp.status.toLowerCase() === 'approved' && (
+                    {filteredApp.status.toLowerCase() === 'connection_approved' && (
                       <>
                         <div className="mt-3 p-3 bg-green-100 rounded-md">
                           <p className="text-sm text-green-800">
@@ -132,10 +132,17 @@ export default function TrackMyApplication() {
                             </span>
                           </div>
                         )}
+                        {filteredApp.meterNumber && (
+                          <div className="mt-2 text-sm font-medium text-blue-800">
+                            <span className="bg-blue-100 px-3 py-1 rounded-md">
+                              Meter Number: {filteredApp.meterNumber}
+                            </span>
+                          </div>
+                        )}
                       </>
                     )}
 
-                    {filteredApp.status.toLowerCase() === 'rejected' && (
+                    {filteredApp.status.toLowerCase() === 'fme_rejected' && (
                       <div className="mt-3 p-3 bg-red-100 rounded-md">
                         <p className="text-sm text-red-800">
                           <XCircle className="h-4 w-4 inline mr-1" />

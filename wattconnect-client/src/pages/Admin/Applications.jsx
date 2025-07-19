@@ -46,7 +46,6 @@ export default function Applications() {
     }
   };
 
-
   const handleStatusUpdate = async (application, newStatus) => {
     setProcessing(true);
     try {
@@ -77,6 +76,35 @@ export default function Applications() {
     }
   };
 
+  const confirmAndForwardToFME = async () => {
+    if (!selectedApp || !selectedFme) {
+      alert("Application or FME not selected");
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      await axios.post(
+        `http://localhost:5000/api/assign-fme/${selectedApp.appId}`,
+        { fmeId: selectedFme.fmeId },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      await handleStatusUpdate(selectedApp, 'pending_fme_action');
+      setShowFmeDialog(false);
+      setSelectedFme(null);
+    } catch (error) {
+      console.error('Error assigning FME:', error);
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case 'approved': return 'bg-green-100 text-green-800';
@@ -96,7 +124,7 @@ export default function Applications() {
     const docs = application.uploadedDocs;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-6 border-b flex justify-between items-center">
             <h2 className="text-xl font-bold">Application Details</h2>
@@ -229,17 +257,9 @@ export default function Applications() {
                       Cancel
                     </button>
                     <button
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                      disabled={!selectedFme}
-                      onClick={async () => {
-                        if (!selectedFme) {
-                          alert("Please select an FME before forwarding.");
-                          return;
-                        }
-                        await handleStatusUpdate(application, 'pending_fme_action');
-                        setShowFmeDialog(false);
-                        setSelectedFme(null);
-                      }}
+                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+                      disabled={!selectedFme || processing}
+                      onClick={confirmAndForwardToFME}
                     >
                       Forward to FME
                     </button>

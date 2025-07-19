@@ -4,207 +4,150 @@ import Navbar from '../../components/Navbar';
 import { AuthContext } from '../../context/AuthContext';
 
 export default function MeterScheduling() {
-  const [requests, setRequests] = useState([]);
-  const [selectedRequest, setSelectedRequest] = useState(null);
-  const [fmes, setFmes] = useState([]);
-  const [selectedFme, setSelectedFme] = useState(null);
-  const [showFmeDialog, setShowFmeDialog] = useState(false);
+  const [applications, setApplications] = useState([]);
+  const [processing, setProcessing] = useState(false);
+  const [meters, setMeters] = useState([]);
+  const [selectedMeters, setSelectedMeters] = useState({});
   const { token } = useContext(AuthContext);
 
-  const fetchMeterRequests = async () => {
+  useEffect(() => {
+    fetchApplications();
+    fetchMeters();
+  }, []);
+
+  const fetchApplications = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/schedule', {
-        params: { type: 'meter' },
+      const res = await axios.get('http://localhost:5000/api/new-connection/all', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      const requestList = Array.isArray(res.data)
-        ? res.data
-        : Array.isArray(res.data.data)
-        ? res.data.data
-        : [];
-
-      const pendingOnly = requestList.filter((r) => r.status === 'Pending');
-      setRequests(pendingOnly);
-    } catch (err) {
-      console.error('Error fetching meter installation requests:', err);
-      setRequests([]);
+      setApplications(res.data.filter(app => app.status === "fme_approved"));
+    } catch (error) {
+      console.error('Error fetching applications:', error);
     }
   };
 
-  useEffect(() => {
-    if (token) fetchMeterRequests();
-  }, [token]);
-
-  const handleReject = async (id) => {
+  const fetchMeters = async () => {
     try {
-      await axios.post(
-        `http://localhost:5000/api/schedule/${id}/reject`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { type: 'meter' },
-        }
-      );
-      await fetchMeterRequests();
-      setSelectedRequest(null);
-    } catch (err) {
-      console.error('Error rejecting request:', err);
+      const res = await axios.get('http://localhost:5000/api/meters');
+      setMeters(res.data); 
+    } catch (error) {
+      console.error('Error fetching meters:', error);
     }
   };
 
-  const handleAccept = async (id) => {
-    try {
-      await axios.post(
-        `http://localhost:5000/api/schedule/${id}/accept`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { type: 'meter' },
-        }
-      );
-
-      const res = await axios.get('http://localhost:5000/api/fmes', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setFmes(Array.isArray(res.data) ? res.data : []);
-      setShowFmeDialog(true);
-    } catch (err) {
-      console.error('Error accepting request or fetching FMEs:', err);
-    }
+  const handleMeterSelect = (appId, meterType) => {
+    setSelectedMeters(prev => ({
+      ...prev,
+      [appId]: meterType
+    }));
   };
 
-  const confirmFmeAssignment = async () => {
-    if (!selectedFme || !selectedRequest) return;
-
+  const handleStatusUpdate = async (application, newStatus) => {
+    setProcessing(true);
     try {
-      await axios.post(
-        `http://localhost:5000/api/schedule/${selectedRequest._id}/assign-fme`,
-        { fmeId: selectedFme._id },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { type: 'meter' },
-        }
+      if (newStatus === 'connection_approved') {
+        const res = await axios.put(`http://localhost:5000/api/approve-new-connection/${application.appId}`);
+        const updatedApp = { ...application, status: "connection_approved", consumerNumber: res.data.consumerNumber };
+        
+        setApplications(prev =>
+          prev.map(app =>
+            app._id === application._id ? updatedApp : app
+          )
+        );
+        setSelectedApp(null);
+        return;
+      }
+  
+      await axios.put(`http://localhost:5000/api/new-connection/${application.appId}/status`,
+      { status: newStatus },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
       );
-
-      setSelectedFme(null);
-      setSelectedRequest(null);
-      setShowFmeDialog(false);
-      await fetchMeterRequests(); // Only now refresh
-    } catch (err) {
-      console.error('Error assigning FME:', err);
+  
+      setApplications(prev =>
+        prev.map(app =>
+          app._id === application._id ? { ...app, status: newStatus } : app
+        )
+      );
+  
+      setSelectedApp(null);
+  
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert(`Error: ${error.response?.data?.message || error.message}`);
+    } finally {
+       setProcessing(false);
     }
   };
 
   return (
-    <div className="flex h-screen bg-[#f4f6fa]">
-      <Navbar type="admin" />
-      <main className="flex-1 px-4 sm:px-8 pt-15 pb-10 overflow-y-auto relative">
-        <h1 className="text-2xl font-bold mb-6">Pending meter installation schedule requests</h1>
+      <div className="flex h-screen bg-[#f4f6fa]">
+        <Navbar type="admin" />
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+          <h1 className="text-2xl font-bold mb-6">Applications approved by FMEs</h1>
+          {applications.map(app => (
+            <div key={app._id} className="bg-white rounded-lg shadow p-4 mb-6">
+              <p><strong>App ID:</strong> {app.appId}</p>
+              <p><strong>District:</strong> {app.district}</p>
+              <p><strong>Subdivision:</strong> {app.subdivision}</p>
+              <p><strong>Applied Category:</strong> {app.appliedCategory}</p>
+              <p><strong>Applied Load:</strong> {app.appliedLoad}</p>
 
-        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${(selectedRequest || showFmeDialog) ? 'blur-sm pointer-events-none' : ''}`}>
-          {requests.map((request) => (
-            <div key={request._id} className="bg-white shadow-md rounded-lg p-4">
-              <p className="font-semibold text-gray-800 mb-1">{request.applicantName}</p>
-              <p className="text-sm text-gray-600">Consumer #: {request.consumerNumber}</p>
-              <p className="text-sm text-gray-600 mb-4">Purpose: {request.usageType}</p>
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
-                onClick={() => setSelectedRequest(request)}
-              >
-                View
-              </button>
+              <div className="mt-4">
+                <h2 className="font-semibold text-lg">Consumer Details</h2>
+                <p><strong>Name:</strong> {app.consumerDetails?.name}</p>
+                <p><strong>Father's Name:</strong> {app.consumerDetails?.fatherName}</p>
+              </div>
+
+              <div className="mt-4">
+                <h2 className="font-semibold text-lg">Address Details</h2>
+                <p><strong>Area:</strong> {app.addressDetails?.area}</p>
+                <p><strong>Village/Town:</strong> {app.addressDetails?.villageOrTown}</p>
+                <p><strong>Post Office:</strong> {app.addressDetails?.postOffice}</p>
+                <p><strong>Police Station:</strong> {app.addressDetails?.policeStation}</p>
+                <p><strong>District:</strong> {app.addressDetails?.district}</p>
+                <p><strong>PIN Code:</strong> {app.addressDetails?.pinCode}</p>
+                <p><strong>Mobile Number:</strong> {app.addressDetails?.mobileNumber}</p>
+              </div>
+
+              <div className="mt-4">
+                <label htmlFor={`meter-${app._id}`} className="block text-sm font-medium mb-1">Select Meter Type:</label>
+                <select
+                  id={`meter-${app._id}`}
+                  value={selectedMeters[app._id] || ""}
+                  onChange={(e) => handleMeterSelect(app._id, e.target.value)}
+                  className="border border-gray-300 rounded p-2 w-full md:w-2/3"
+                >
+                  <option value="">Select Meter</option>
+                  {meters.map((meter, index) => (
+                    <option
+                      key={`${meter._id}-${index}`}
+                      value={meter.type} // You can change to `meter._id` if needed
+                      disabled={!meter.isAvailable}>
+                      {`${meter.type} - ${meter.company} (${meter.isAvailable ? "Available" : "Unavailable"})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedMeters[app._id] && (
+                <button
+                  className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                  onClick={() => handleStatusUpdate(app, 'connection_approved')}
+                  disabled={processing}
+                >
+                  {processing ? "Processing..." : "Confirm"}
+                </button>
+              )}
             </div>
           ))}
-        </div>
-
-        {/* Request Details Panel */}
-        {selectedRequest && !showFmeDialog && (
-          <div className="fixed inset-0 z-50 bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg mx-auto max-w-2xl border border-gray-300">
-            <h2 className="text-2xl font-bold mb-4">Meter Installation Visit Details</h2>
-            <div className="space-y-2 text-gray-700">
-              <p><strong>Consumer Number:</strong> {selectedRequest.consumerNumber}</p>
-              <p><strong>District:</strong> {selectedRequest.district}</p>
-              <p><strong>Subdivision:</strong> {selectedRequest.subdivision}</p>
-              <p><strong>Name:</strong> {selectedRequest.applicantName}</p>
-              <p><strong>Address:</strong> {selectedRequest.address}</p>
-              <p><strong>Purpose:</strong> {selectedRequest.usageType}</p>
-              <p><strong>Reason:</strong> {selectedRequest.reason}</p>
-              <p><strong>Preferred Date:</strong> {selectedRequest.preferredDate}</p>
-            </div>
-
-            <div className="flex justify-end gap-4 mt-6">
-              <button
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-                onClick={() => setSelectedRequest(null)}
-              >
-                Go Back
-              </button>
-              <button
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                onClick={() => handleAccept(selectedRequest._id)}
-              >
-                Accept
-              </button>
-              <button
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={() => handleReject(selectedRequest._id)}
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* FME Assignment Dialog */}
-        {showFmeDialog && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-2xl font-bold mb-4">Assign FME</h2>
-              <div className="space-y-4 max-h-[400px] overflow-y-auto">
-                {fmes.map((fme) => (
-                  <div
-                    key={fme._id}
-                    className={`p-4 border rounded cursor-pointer ${
-                      selectedFme && selectedFme._id === fme._id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'hover:border-gray-400'
-                    }`}
-                    onClick={() => setSelectedFme(fme)}
-                  >
-                    <p className="font-semibold text-lg">{fme.name}</p>
-                    <p>Employee ID: {fme.employeeId}</p>
-                    <p>Contact: {fme.contactNumber}</p>
-                    <p>Email: {fme.email}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end gap-4 mt-6">
-                <button
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-                  onClick={() => {
-                    setShowFmeDialog(false);
-                    setSelectedFme(null);
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                  disabled={!selectedFme}
-                  onClick={confirmFmeAssignment}
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
+        </main>
+      </div>
   );
 }
