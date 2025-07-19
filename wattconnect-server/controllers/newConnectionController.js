@@ -101,9 +101,27 @@ const updateApplicationStatus = async (req, res) => {
   }
 };
 
+const getApplicationByAppId = async (req, res) => {
+  const { appId } = req.params;
+
+  try {
+    const application = await NewConnection.findOne({ appId });
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    res.json(application);
+  } catch (error) {
+    console.error("Error fetching application by appId:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 
 module.exports = {
   submitApplication,
   getApplications,
   updateApplicationStatus,
+  getApplicationByAppId,
 };

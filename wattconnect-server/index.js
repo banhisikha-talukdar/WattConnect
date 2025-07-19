@@ -11,6 +11,7 @@ const tariffRoutes = require("./routes/tariff");
 const scheduleRoutes = require('./routes/schedule');
 const fmeRoutes = require("./routes/fme");
 const chatbotRoute = require('./routes/chatbot');
+const adminRoutes = require('./routes/admin');
 
 dotenv.config();
 connectDB();
@@ -31,6 +32,7 @@ app.use("/api/tariffs", tariffRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use("/api/fmes", fmeRoutes);
 app.use("/api/chatbot", chatbotRoute); 
+app.use("/api", adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

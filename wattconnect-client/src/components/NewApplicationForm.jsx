@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Upload, X, FileText, CheckCircle, RotateCcw, Eye, ArrowLeft } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 export default function NewApplicationForm() {
+  const [applicationId, setApplicationId] = useState('');
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -47,18 +50,18 @@ export default function NewApplicationForm() {
   const subdivisionMap = {
     'KAMRUP-M': [
       "021-AMINGAON", "030-AZARA", "009-BASISTHA", "010-CAPITAL",
-      "014-CHANDMARI", "001-FANCEBAZAR", "003-FATASHIL", "011-GARBHANGA",
-      "006-IRCA GEC 1", "023-JALUKBARI", "002-KALAPAHAR", "029-MIRZA",
+      "014-CHANDMARI", "001-FANCY BAZAR", "003-FATASIL", "011-GARBHANGA",
+      "006-GUWAHATI IRCA - I", "023-JALUKBARI", "002-KALAPAHAR", "029-MIRZA",
       "015-NARENGI", "004-PALTANBAZAR", "013-SONAPUR", "005-ULUBARI",
       "016-UZANBAZAR", "017-ZOO ROAD"
     ],
     'DIBRUGARH': [
       "220-BORDUBI", "207-DIBRUGARH-I", "208-DIBRUGARH-II", "209-DIBRUGARH-III",
-      "210-IRCA DIBRUGARH", "201-MORAN", "219-NAHARKATIA", "221-NAMRUP",
+      "210-DIBRUGARH IRCA", "201-MORAN", "219-NAHARKATIA", "221-NAMRUP",
       "204-TINGKHONG", "217-TINSUKIA-III"
     ],
     'JORHAT': [
-      "172-DERGAON", "175-IRCA JORHAT", "170-JORHAT-I", "171-JORHAT-II",
+      "172-DERGAON", "175-JORHAT IRCA", "170-JORHAT-I", "171-JORHAT-II",
       "173-JORHAT-III", "189-KAKOJAN", "177-MARIANI", "188-TEOK", "176-TITABOR"
     ]
   };
@@ -237,7 +240,7 @@ export default function NewApplicationForm() {
       const res = await fetch("http://localhost:5000/api/new-connection", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: payload,
       });
@@ -254,11 +257,10 @@ export default function NewApplicationForm() {
       }
 
       const result = await res.json();
-
-      setSubmitStatus("Application submitted successfully!");
-      console.log("Submitted:", result);
+      setApplicationId(result.appId); 
 
       setSubmitStatus("success");
+      console.log("Submitted:", result);
 
     } catch (err) {
       console.error("Submission error:", err);
@@ -352,14 +354,18 @@ export default function NewApplicationForm() {
       <h1 className="text-3xl font-bold text-green-800 mb-6">
         Your application has been submitted successfully!
       </h1>
+      {applicationId && (
+        <>
+          <p className="text-lg text-gray-800 mb-2">
+            Here is your application ID: <span className="font-semibold text-blue-700">{applicationId}</span>
+          </p>
+          <p className="text-sm text-red-600 font-medium">
+            NOTE: This application ID is useful for tracking your application and check for your consumer number(if your application is approved) in the future .
+          </p>
+        </>
+      )}
 
       <div className="flex flex-col gap-4 w-full max-w-sm">
-        <button
-          onClick={() => navigate("/new-connection-form")}
-          className="bg-green-600 hover:bg-[#d4b42b] text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-        >
-          Apply for another connection
-        </button>
 
         <button
           onClick={() => navigate("/track-my-application")}

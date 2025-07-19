@@ -10,6 +10,7 @@ const {
   submitApplication,
   getApplications,
   updateApplicationStatus,
+  getApplicationByAppId,
 } = require("../controllers/newConnectionController");
 
 const uploadPath = path.join(__dirname, "..", "uploads", "applications");
@@ -49,5 +50,6 @@ router.post(
 router.get("/all", verifyToken, getApplications);
 
 router.put("/:applicationId/status", verifyToken, updateApplicationStatus);
+router.get("/track/:appId", getApplicationByAppId);
 
 module.exports = router;

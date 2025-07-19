@@ -7,7 +7,7 @@ const NewApplicationButton = () => {
   const navigate = useNavigate();
 
   const handleTextClick = () => {
-    navigate('/new-application');
+    navigate('/new-application', { state: { from: '/customer/dashboard' } });
   };
 
   const handleChevronClick = (e) => {

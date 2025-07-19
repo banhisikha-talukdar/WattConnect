@@ -1,13 +1,14 @@
-import { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext'; // Adjust path if needed
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export default function NewApplication() {
-  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleBack = () => {
-    if (token) {
+    const from = location.state?.from;
+
+    // Navigate back to dashboard if came from there, else to landing page
+    if (from === '/customer/dashboard') {
       navigate('/customer/dashboard');
     } else {
       navigate('/');

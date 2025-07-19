@@ -41,4 +41,4 @@ const newApplicationSchema = new mongoose.Schema({
   status: { type: String, default: "Pending" },
 });
 
-module.exports = mongoose.model("NewApplication", newApplicationSchema);
+module.exports = mongoose.model("NewConnection", newApplicationSchema, "newapplications");

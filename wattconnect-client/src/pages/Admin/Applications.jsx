@@ -1,13 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
 import Navbar from '../../components/Navbar';
-import { Eye, Check, X, FileText, Download, User, MapPin, Calendar, ArrowLeft} from 'lucide-react';
+import {
+  Eye, Check, X, FileText, Download,
+  User, MapPin, Calendar, ArrowLeft
+} from 'lucide-react';
 import { AuthContext } from "../../context/AuthContext";
+import axios from 'axios';
 
 export default function Applications() {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [processing, setProcessing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -16,50 +19,55 @@ export default function Applications() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/new-connection/all', {
+      const res = await axios.get('http://localhost:5000/api/new-connection/all', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setApplications(data.filter(app => app.status === "Pending")); // ✅ Show only pending
-      }
+      setApplications(res.data.filter(app => app.status === "Pending"));
     } catch (error) {
       console.error('Error fetching applications:', error);
-    } 
+    }
   };
 
-  const filteredApplications = searchTerm.trim()
-  ? applications.filter(app =>
-      app.status === 'Pending' &&
-      String(app._id) === searchTerm.trim()
-    )
-  : applications;
-
-  const handleStatusUpdate = async (applicationId, newStatus) => {
+  const handleStatusUpdate = async (application, newStatus) => {
     setProcessing(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/new-connection/${applicationId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-           Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      if (newStatus === 'Approved') {
+  const res = await axios.put(`http://localhost:5000/api/approve-new-connection/${application.appId}`);
+  const updatedApp = { ...application, status: "Approved", consumerNumber: res.data.consumerNumber };
+  
+  setApplications(prev =>
+    prev.map(app =>
+      app._id === application._id ? updatedApp : app
+    )
+  );
+  setSelectedApp(null);
+  return;
+}
 
-      if (response.ok) {
-        setApplications(prev => 
-          prev.map(app => 
-            app._id === applicationId ? { ...app, status: newStatus } : app
-          )
-        );
-        setSelectedApp(null);
-      }
+      await axios.put(
+        `http://localhost:5000/api/new-connection/${application.appId}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setApplications(prev =>
+        prev.map(app =>
+          app._id === application._id ? { ...app, status: newStatus } : app
+        )
+      );
+
+      setSelectedApp(null);
+
     } catch (error) {
       console.error('Error updating status:', error);
+      alert(`Error: ${error.response?.data?.message || error.message}`);
     } finally {
       setProcessing(false);
     }
@@ -75,93 +83,57 @@ export default function Applications() {
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   };
 
   const ApplicationModal = ({ application, onClose }) => {
     const docs = application.uploadedDocs;
-    
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6 border-b">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">Application Details</h2>
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+          <div className="p-6 border-b flex justify-between items-center">
+            <h2 className="text-xl font-bold">Application Details</h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <X className="h-6 w-6" />
+            </button>
           </div>
-          
+
           <div className="p-6 space-y-6">
+            {/* Basic Info */}
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold text-lg mb-3">Basic Information</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-gray-600">District:</span>
-                  <p className="font-medium">{application.district}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Subdivision:</span>
-                  <p className="font-medium">{application.subdivision}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Category:</span>
-                  <p className="font-medium">{application.appliedCategory}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Applied Load:</span>
-                  <p className="font-medium">{application.appliedLoad} KW</p>
-                </div>
+                <div><span className="text-sm text-gray-600">Application ID:</span><p className="font-medium">{application.appId}</p></div>
+                <div><span className="text-sm text-gray-600">District:</span><p className="font-medium">{application.district}</p></div>
+                <div><span className="text-sm text-gray-600">Subdivision:</span><p className="font-medium">{application.subdivision}</p></div>
+                <div><span className="text-sm text-gray-600">Category:</span><p className="font-medium">{application.appliedCategory}</p></div>
+                <div><span className="text-sm text-gray-600">Applied Load:</span><p className="font-medium">{application.appliedLoad} KW</p></div>
               </div>
             </div>
 
+            {/* Consumer Details */}
             <div className="bg-green-50 p-4 rounded-lg">
               <h3 className="font-semibold text-lg mb-3">Consumer Details</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-gray-600">Name:</span>
-                  <p className="font-medium">{application.consumerDetails.name}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Father's Name:</span>
-                  <p className="font-medium">{application.consumerDetails.fatherName}</p>
-                </div>
+                <div><span className="text-sm text-gray-600">Application ID:</span><p className="font-medium">{application.consumerDetails.appId}</p></div>
+                <div><span className="text-sm text-gray-600">Name:</span><p className="font-medium">{application.consumerDetails.name}</p></div>
+                <div><span className="text-sm text-gray-600">Father's Name:</span><p className="font-medium">{application.consumerDetails.fatherName}</p></div>
               </div>
             </div>
 
+            {/* Address Details */}
             <div className="bg-purple-50 p-4 rounded-lg">
               <h3 className="font-semibold text-lg mb-3">Address Details</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-gray-600">Area:</span>
-                  <p className="font-medium">{application.addressDetails.area}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Village/Town:</span>
-                  <p className="font-medium">{application.addressDetails.villageOrTown}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Post Office:</span>
-                  <p className="font-medium">{application.addressDetails.postOffice}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Police Station:</span>
-                  <p className="font-medium">{application.addressDetails.policeStation}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">District:</span>
-                  <p className="font-medium">{application.addressDetails.district}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Pin Code:</span>
-                  <p className="font-medium">{application.addressDetails.pinCode}</p>
-                </div>
+                <div><span className="text-sm text-gray-600">Area:</span><p className="font-medium">{application.addressDetails.area}</p></div>
+                <div><span className="text-sm text-gray-600">Village/Town:</span><p className="font-medium">{application.addressDetails.villageOrTown}</p></div>
+                <div><span className="text-sm text-gray-600">Post Office:</span><p className="font-medium">{application.addressDetails.postOffice}</p></div>
+                <div><span className="text-sm text-gray-600">Police Station:</span><p className="font-medium">{application.addressDetails.policeStation}</p></div>
+                <div><span className="text-sm text-gray-600">District:</span><p className="font-medium">{application.addressDetails.district}</p></div>
+                <div><span className="text-sm text-gray-600">Pin Code:</span><p className="font-medium">{application.addressDetails.pinCode}</p></div>
               </div>
               <div className="mt-4">
                 <span className="text-sm text-gray-600">Mobile Number:</span>
@@ -169,6 +141,7 @@ export default function Applications() {
               </div>
             </div>
 
+            {/* Documents */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-semibold text-lg mb-3">Uploaded Documents</h3>
               <div className="grid grid-cols-1 gap-3">
@@ -188,7 +161,8 @@ export default function Applications() {
                         <FileText className="h-4 w-4 text-blue-500 mr-2" />
                         <span className="text-sm">{label}</span>
                       </div>
-                      <a href={`http://localhost:5000/${docs[key]}`}
+                      <a
+                        href={`http://localhost:5000/${docs[key]}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800"
@@ -201,26 +175,22 @@ export default function Applications() {
               </div>
             </div>
 
+            {/* Actions */}
             <div className="flex justify-center space-x-4 pt-4 border-t">
-              <button
-                onClick={onClose}
-                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center"
-              >
+              <button onClick={onClose} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Go Back
               </button>
-
               <button
-                onClick={() => handleStatusUpdate(application._id, 'Rejected')}
+                onClick={() => handleStatusUpdate(application, 'Rejected')}
                 disabled={processing}
                 className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 flex items-center"
               >
                 <X className="h-4 w-4 mr-2" />
                 Reject
               </button>
-              
               <button
-                onClick={() => handleStatusUpdate(application._id, 'Approved')}
+                onClick={() => handleStatusUpdate(application, 'Approved')}
                 disabled={processing}
                 className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 flex items-center"
               >
@@ -238,22 +208,7 @@ export default function Applications() {
     <div className="flex h-screen bg-[#f4f6fa]">
       <Navbar type="admin" />
       <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-        <div className="mb-6 flex justify-center">
-          <div className="flex gap-2 w-full max-w-xl">
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="Search by Application ID"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value.replace(/\D/g, ''))} 
-              className="flex-1 border border-gray-300 rounded-full px-4 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-gray-500"
-            />
-          </div>
-        </div>
-
         <h1 className="text-2xl font-bold mb-6">New Connection Applications</h1>
-        
         {applications.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500">No applications found</p>
@@ -263,39 +218,23 @@ export default function Applications() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Applicant
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category & Load
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Submitted
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category & Load</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredApplications.map((app) => (
+                {applications.map(app => (
                   <tr key={app._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <User className="h-5 w-5 text-gray-400 mr-3" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {app.consumerDetails.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {app.userId?.email}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{app.consumerDetails.name}</div>
+                          <div className="text-sm text-gray-500">{app.userId?.email}</div>
                         </div>
                       </div>
                     </td>
@@ -320,16 +259,11 @@ export default function Applications() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">
-                          {formatDate(app.submittedAt)}
-                        </span>
+                        <span className="text-sm text-gray-900">{formatDate(app.submittedAt)}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedApp(app)}
-                        className="text-blue-600 hover:text-blue-800 flex items-center"
-                      >
+                      <button onClick={() => setSelectedApp(app)} className="text-blue-600 hover:text-blue-800 flex items-center">
                         <Eye className="h-4 w-4 mr-1" />
                         View Details
                       </button>

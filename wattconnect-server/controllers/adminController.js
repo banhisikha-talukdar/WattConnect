@@ -3,53 +3,56 @@ const subdivisionIdMap = require("../utils/subdivisionIdMap");
 
 const approveNewConnection = async (req, res) => {
   try {
-    const { connectionId } = req.params;
-    const app = await NewConnection.findById(connectionId);
+    const { appId } = req.params;
 
+    const app = await NewConnection.findOne({ appId });
     if (!app) {
       console.log("❌ Application not found");
-      return res.status(404).json({ message: "Not found" });
+      return res.status(404).json({ message: "Application not found" });
     }
 
     if (app.consumerNo) {
-      console.log("⚠️ Already has consumerNo");
+      console.log("⚠️ Already approved:", app.consumerNo);
       return res.status(400).json({ message: "Already approved" });
     }
 
     const rawSubdivision = app.subdivision?.trim();
-    const subName = rawSubdivision?.split("-")[1]?.trim()?.toLowerCase(); 
+    let subName = rawSubdivision;
+
+    if (rawSubdivision?.includes("-")) {
+      subName = rawSubdivision.split("-")[1]?.trim();
+    }
+
+    subName = subName?.toUpperCase(); // Match CSV format
+    console.log("🔍 Looking up subdivision ID for:", subName);
 
     const subId = subdivisionIdMap[subName];
     if (!subId) {
-      console.log("❌ Invalid subdivision name:", subName);
+      console.log("❌ Subdivision ID not found for:", subName);
       return res.status(400).json({ message: "Subdivision ID not found" });
     }
 
-    let consumerNo, unique = false;
+    let consumerNo;
+    let isUnique = false;
 
-    while (!unique) {
+    while (!isUnique) {
       const random9 = Math.floor(Math.random() * 1e9).toString().padStart(9, "0");
-      consumerNo = `${subId}${random9}`; 
+      consumerNo = `${subId}${random9}`;
       const exists = await NewConnection.findOne({ consumerNo });
-      if (!exists) unique = true;
+      if (!exists) isUnique = true;
     }
 
     app.consumerNo = consumerNo;
+    app.status = "approved";
 
-    try {
-      const saved = await app.save();
-      console.log("✅ Saved consumerNo:", saved.consumerNo);
-      res.status(200).json({ message: "Approved", consumerNo });
-    } catch (err) {
-      console.error("❌ Save failed:", err.message);
-      res.status(500).json({ message: "DB save error" });
-    }
+    await app.save();
+    console.log("✅ Application approved. Consumer No:", consumerNo);
+    return res.status(200).json({ message: "Application approved", consumerNo });
 
   } catch (err) {
-    console.error("❌ Server error:", err.message);
-    res.status(500).json({ message: "Internal error" });
+    console.error("❌ Error approving application:", err.message);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 module.exports = { approveNewConnection };
