@@ -1,11 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const fmeSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  employeeId: { type: String, required: true, unique: true },
-  contactNumber: { type: String },
-  email: { type: String },
-  assignedSchedules: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Schedule' }],
+  fmeId: { type: String, required: true, unique: true },
+  phone: String,
+  district: String
 });
 
-module.exports = mongoose.model('FME', fmeSchema);
+module.exports = mongoose.model("FME", fmeSchema);

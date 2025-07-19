@@ -11,6 +11,29 @@ const newApplicationSchema = new mongoose.Schema({
   appId: { type: String, unique: true },
   consumerNo: { type: String, unique: true },
 
+  assignedFME: { type: mongoose.Schema.Types.ObjectId, ref: "FME", default: null },
+  fmeStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+  fmeRemarks: String,
+
+  meterType: {
+    type: String,
+    enum: ["single_phase", "three_phase", "lt_meter"]
+  },
+  meterNumber: String,
+  consumerNumber: String,
+
+  status: {
+    type: String,
+    enum: [
+      "pending_admin_forward",
+      "pending_fme_action",
+      "fme_rejected",
+      "fme_approved",
+      "connection_approved"
+    ],
+    default: "pending_admin_forward"
+  },
+
   consumerDetails: {
     name: String,
     fatherName: String,
@@ -38,7 +61,6 @@ const newApplicationSchema = new mongoose.Schema({
   },
 
   submittedAt: { type: Date, default: Date.now },
-  status: { type: String, default: "Pending" },
 });
 
 module.exports = mongoose.model("NewConnection", newApplicationSchema, "newapplications");

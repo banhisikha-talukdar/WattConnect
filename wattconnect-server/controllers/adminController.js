@@ -1,5 +1,7 @@
 const NewConnection = require("../models/NewConnection");
 const subdivisionIdMap = require("../utils/subdivisionIdMap");
+const FME = require("../models/FME");
+const Meter = require("../models/Meter");
 
 const approveNewConnection = async (req, res) => {
   try {
@@ -23,7 +25,7 @@ const approveNewConnection = async (req, res) => {
       subName = rawSubdivision.split("-")[1]?.trim();
     }
 
-    subName = subName?.toUpperCase(); // Match CSV format
+    subName = subName?.toUpperCase();
     console.log("🔍 Looking up subdivision ID for:", subName);
 
     const subId = subdivisionIdMap[subName];
@@ -42,8 +44,14 @@ const approveNewConnection = async (req, res) => {
       if (!exists) isUnique = true;
     }
 
+    const companyName = app?.consumerDetails?.meterCompany || "GENU";
+    const prefix = companyName.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4).padEnd(4, "X");
+    const random6 = Math.floor(100000 + Math.random() * 900000);
+    const meterNumber = `${prefix}${random6}`;
+
     app.consumerNo = consumerNo;
-    app.status = "approved";
+    app.meterNumber = meterNumber;
+    app.status = "connection_approved";
 
     await app.save();
     console.log("✅ Application approved. Consumer No:", consumerNo);
@@ -55,4 +63,31 @@ const approveNewConnection = async (req, res) => {
   }
 };
 
-module.exports = { approveNewConnection };
+const getAllFMEs = async (req, res) => {
+  try {
+    const fmes = await FME.find();
+    res.json(fmes);
+  } catch (error) {
+    console.error("Error fetching FMEs:", error);
+    res.status(500).json({ error: "Server error fetching FMEs" });
+  }
+};
+
+const getMetersByType = async (req, res) => {
+  try {
+    const { type } = req.query;
+    const query = type ? { type } : {};
+    const meters = await Meter.find(query);
+    res.json(meters);
+  } catch (error) {
+    console.error("Error fetching meters:", error);
+    res.status(500).json({ error: "Server error fetching meters" });
+  }
+};
+
+
+module.exports = { 
+  approveNewConnection,
+  getAllFMEs,
+  getMetersByType
+};
