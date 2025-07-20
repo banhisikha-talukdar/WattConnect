@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const FME = require("../models/FME");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -14,6 +15,7 @@ exports.register = async (req, res) => {
       consumerNumber,
       usageType,
       category,
+      fmeId,
     } = req.body;
 
     console.log("📝 Signup attempt for:", username);
@@ -53,12 +55,28 @@ exports.register = async (req, res) => {
       username: username.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: role === "admin" ? "admin" : "customer",
+      role: role === "admin" ? "admin" : role,
       isExistingCustomer,
       consumerNumber: isExistingCustomer ? consumerNumber : undefined,
       usageType: isExistingCustomer ? usageType : undefined,
       category: isExistingCustomer ? category : undefined,
+      fmeId: role === "engineer" ? fmeId : undefined,
     });
+
+    if (user.role === "engineer") {
+      let fme = await FME.findOne({ email: user.email });
+
+      if (!fme) {
+        fme = new FME({
+          name: user.name,
+          email: user.email,
+        });
+        await fme.save();
+      }
+
+      user.fmeId = fme._id;
+    }
+
 
     await user.save();
 
@@ -81,6 +99,7 @@ exports.register = async (req, res) => {
         consumerNumber: user.consumerNumber || null,
         usageType: user.usageType || null,
         category: user.category || null,
+        fmeId: user.fmeId || null,
       },
     });
   } catch (err) {
@@ -130,6 +149,7 @@ exports.login = async (req, res) => {
         consumerNumber: user.consumerNumber || null,
         usageType: user.usageType || null,
         category: user.category || null,
+        fmeId: user.fmeId || null,
       },
     });
   } catch (err) {
@@ -157,6 +177,7 @@ exports.getMe = async (req, res) => {
       consumerNumber: user.consumerNumber || null,
       usageType: user.usageType || null,
       category: user.category || null,
+      fmeId: user.fmeId || null,
     });
   } catch (err) {
     console.error("❌ Error in getMe controller:", err);

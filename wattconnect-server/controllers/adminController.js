@@ -85,9 +85,37 @@ const getMetersByType = async (req, res) => {
   }
 };
 
+const assignFMEToApplication = async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const { fmeId } = req.body;
+
+    const app = await NewConnection.findOne({ appId });
+    if (!app) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    const fme = await FME.findById(fmeId);
+    if (!fme) {
+      return res.status(404).json({ message: "FME not found" });
+    }
+
+    app.assignedFME = fmeId;
+    app.status = "fme_assigned";
+    await app.save();
+
+    res.status(200).json({ message: "FME assigned successfully", app });
+  } catch (error) {
+    console.error("❌ Error assigning FME:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
 
 module.exports = { 
   approveNewConnection,
   getAllFMEs,
-  getMetersByType
+  getMetersByType,
+  assignFMEToApplication,
 };

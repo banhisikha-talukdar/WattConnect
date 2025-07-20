@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+  role: { type: String, enum: ['customer', 'admin', 'engineer'], default: 'customer' },
 
   isExistingCustomer: { type: Boolean, default: false },
 
@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
       },
       message: 'Category is required for existing customers',
     },
+  },
+
+  fmeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "FME",
   },
 });
 
