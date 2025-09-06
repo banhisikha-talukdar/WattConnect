@@ -29,7 +29,7 @@ const submitApplication = async (req, res) => {
     const uploads = req.files || {};
 
     const newForm = new NewConnection({
-      userId: req.user.userId,
+      userId: req.user?.userId || null,
       district,
       subdivision,
       appId,
@@ -79,7 +79,11 @@ const updateApplicationStatus = async (req, res) => {
   const { applicationId } = req.params;
   const { status } = req.body;
 
-  if (!["Pending", "Approved", "Rejected"].includes(status)) {
+  if (!["pending_admin_forward",
+      "pending_fme_action",
+      "fme_rejected",
+      "fme_approved",
+      "connection_approved"].includes(status)) {
     return res.status(400).json({ error: "Invalid status value" });
   }
 

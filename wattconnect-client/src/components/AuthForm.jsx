@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function AuthForm({ mode }) {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [isExistingCustomer, setIsExistingCustomer] = useState(null); // null, true, false
 
@@ -16,6 +18,7 @@ export default function AuthForm({ mode }) {
     consumerNumber: "",
     usageType: "",
     category: "",
+    fmeId: "",
   });
 
   const categoryOptions = {
@@ -56,6 +59,13 @@ export default function AuthForm({ mode }) {
         return;
       }
     }
+    if (mode === "signup" && formData.role === "engineer") {
+      const fmeIdPattern = /^[A-Za-z]{3}\d{3}$/;
+      if (!fmeIdPattern.test(formData.fmeId.trim())) {
+        alert("Invalid FME ID. It must be 3 letters followed by 3 digits (e.g. ABC123).");
+        return;
+      }
+    }
 
     const endpoint =
       mode === "signup"
@@ -78,10 +88,16 @@ export default function AuthForm({ mode }) {
                 usageType: formData.usageType,
                 category: formData.category,
               }),
+            ...(formData.role === "engineer" && {
+              fmeId: formData.fmeId,
+            }),
           }
         : {
             email: formData.email,
             password: formData.password,
+            ...(formData.role === "engineer" && {
+              fmeId: formData.fmeId,
+            }),
           };
 
     try {
@@ -101,7 +117,8 @@ export default function AuthForm({ mode }) {
       }
 
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        //localStorage.setItem("token", data.token);
+        login(data.token, data.user);
       }
 
       if (mode === "signup" && formData.role === "customer") {
@@ -203,6 +220,20 @@ export default function AuthForm({ mode }) {
         <option value="admin">Admin</option>
         <option value="engineer">Engineer</option>
       </select>
+      
+      {(formData.role === "engineer") && (
+        <input
+          type="text"
+          placeholder="FME ID (e.g. ABC123)"
+          value={formData.fmeId}
+          maxLength={6}
+          required
+          pattern="[A-Za-z]{3}[0-9]{3}"
+          title="FME ID must be 3 letters followed by 3 digits (e.g. ABC123)"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => handleInputChange("fmeId", e.target.value.toUpperCase())}
+        />
+      )}
 
       {mode === "signup" && formData.role === "customer" && (
         <div className="flex flex-col gap-2">

@@ -143,7 +143,7 @@ export default function TrackMyApplication() {
                     )}
 
                     {filteredApp.status.toLowerCase() === 'fme_rejected' && (
-                      <div className="mt-3 p-3 bg-red-100 rounded-md">
+                      <div className="mt-3 p-3 bg-red-100 rounded-md space-y-2">
                         <p className="text-sm text-red-800">
                           <XCircle className="h-4 w-4 inline mr-1" />
                           Your application has been rejected. Please contact support.
@@ -151,7 +151,7 @@ export default function TrackMyApplication() {
                       </div>
                     )}
 
-                    {filteredApp.status.toLowerCase() === 'pending' && (
+                    {['pending_admin_forward', 'pending_fme_action'].includes(filteredApp.status.toLowerCase()) && (
                       <div className="mt-3 p-3 bg-yellow-100 rounded-md">
                         <p className="text-sm text-yellow-800">
                           <Clock className="h-4 w-4 inline mr-1" />

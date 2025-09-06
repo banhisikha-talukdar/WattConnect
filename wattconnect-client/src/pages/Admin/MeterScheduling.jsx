@@ -5,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 
 export default function MeterScheduling() {
   const [applications, setApplications] = useState([]);
+  const [selectedApp, setSelectedApp] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [meters, setMeters] = useState([]);
   const [selectedMeters, setSelectedMeters] = useState({});
@@ -37,52 +38,56 @@ export default function MeterScheduling() {
     }
   };
 
-  const handleMeterSelect = (appId, meterType) => {
+  const handleMeterFieldSelect = (appId, field, value) => {
     setSelectedMeters(prev => ({
       ...prev,
-      [appId]: meterType
+      [appId]: {
+        ...prev[appId],
+        [field]: value
+      }
     }));
+    
+    if (selectedApp && selectedApp.appId === appId) {
+      setSelectedApp(prev => ({
+        ...prev,
+        meterCompany: field === "company" ? value : prev.meterCompany,
+        meterType: field === "type" ? value : prev.meterType
+      }));
+    }
   };
 
-  const handleStatusUpdate = async (application, newStatus) => {
+  const handleConnectionConfirm = async (application) => {
     setProcessing(true);
+    const selected = selectedMeters[application.appId];
+    const matchedMeter = meters.find(
+      m => m.type === selected.type && m.company === selected.company && m.isAvailable
+    );
+
+    if (!matchedMeter) {
+      alert("Selected meter combination not available.");
+      setProcessing(false);
+      return;
+    }
     try {
-      if (newStatus === 'connection_approved') {
-        const res = await axios.put(`http://localhost:5000/api/approve-new-connection/${application.appId}`);
-        const updatedApp = { ...application, status: "connection_approved", consumerNumber: res.data.consumerNumber };
-        
-        setApplications(prev =>
-          prev.map(app =>
-            app._id === application._id ? updatedApp : app
-          )
-        );
-        setSelectedApp(null);
-        return;
-      }
-  
-      await axios.put(`http://localhost:5000/api/new-connection/${application.appId}/status`,
-      { status: newStatus },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      await axios.put(
+        `http://localhost:5000/api/approve-new-connection/${application.appId}`
       );
-  
-      setApplications(prev =>
-        prev.map(app =>
-          app._id === application._id ? { ...app, status: newStatus } : app
-        )
-      );
-  
+
+      setSelectedMeters(prev => ({
+        ...prev,
+        [application.appId]: {
+          ...selected,
+          status: "connection_approved"
+        }
+      }));
+
       setSelectedApp(null);
-  
+      alert("Connection approved successfully");
     } catch (error) {
-      console.error('Error updating status:', error);
+      console.error("Error approving connection:", error);
       alert(`Error: ${error.response?.data?.message || error.message}`);
     } finally {
-       setProcessing(false);
+      setProcessing(false);
     }
   };
 
@@ -91,62 +96,106 @@ export default function MeterScheduling() {
         <Navbar type="admin" />
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           <h1 className="text-2xl font-bold mb-6">Applications approved by FMEs</h1>
-          {applications.map(app => (
-            <div key={app._id} className="bg-white rounded-lg shadow p-4 mb-6">
-              <p><strong>App ID:</strong> {app.appId}</p>
-              <p><strong>District:</strong> {app.district}</p>
-              <p><strong>Subdivision:</strong> {app.subdivision}</p>
-              <p><strong>Applied Category:</strong> {app.appliedCategory}</p>
-              <p><strong>Applied Load:</strong> {app.appliedLoad}</p>
+          <table className="min-w-full bg-white shadow-md rounded">
+            <thead>
+              <tr className="bg-gray-100 text-left text-sm font-semibold">
+                <th className="p-3">App ID</th>
+                <th className="p-3">Name</th>
+                <th className="p-3">Category</th>
+                <th className="p-3">Load</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {applications.map(app => {
+                const confirmed = selectedMeters[app.appId] === "connection_approved";
+                return (
+                  <tr key={app._id} className={confirmed ? "bg-green-100" : "bg-white"}>
+                    <td className="p-3">{app.appId}</td>
+                    <td className="p-3">{app.consumerDetails?.name}</td>
+                    <td className="p-3">{app.appliedCategory}</td>
+                    <td className="p-3">{app.appliedLoad}</td>
+                    <td className="p-3">
+                      {confirmed ? "Connection Approved" : "Pending"}
+                    </td>
+                    <td className="p-3">
+                      {!confirmed && (
+                        <button
+                          className="text-blue-600 underline"
+                          onClick={() => setSelectedApp(app)}
+                        >
+                          View Details
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
 
-              <div className="mt-4">
-                <h2 className="font-semibold text-lg">Consumer Details</h2>
-                <p><strong>Name:</strong> {app.consumerDetails?.name}</p>
-                <p><strong>Father's Name:</strong> {app.consumerDetails?.fatherName}</p>
-              </div>
-
-              <div className="mt-4">
-                <h2 className="font-semibold text-lg">Address Details</h2>
-                <p><strong>Area:</strong> {app.addressDetails?.area}</p>
-                <p><strong>Village/Town:</strong> {app.addressDetails?.villageOrTown}</p>
-                <p><strong>Post Office:</strong> {app.addressDetails?.postOffice}</p>
-                <p><strong>Police Station:</strong> {app.addressDetails?.policeStation}</p>
-                <p><strong>District:</strong> {app.addressDetails?.district}</p>
-                <p><strong>PIN Code:</strong> {app.addressDetails?.pinCode}</p>
-                <p><strong>Mobile Number:</strong> {app.addressDetails?.mobileNumber}</p>
-              </div>
-
-              <div className="mt-4">
-                <label htmlFor={`meter-${app._id}`} className="block text-sm font-medium mb-1">Select Meter Type:</label>
-                <select
-                  id={`meter-${app._id}`}
-                  value={selectedMeters[app._id] || ""}
-                  onChange={(e) => handleMeterSelect(app._id, e.target.value)}
-                  className="border border-gray-300 rounded p-2 w-full md:w-2/3"
-                >
-                  <option value="">Select Meter</option>
-                  {meters.map((meter, index) => (
-                    <option
-                      key={`${meter._id}-${index}`}
-                      value={meter.type} // You can change to `meter._id` if needed
-                      disabled={!meter.isAvailable}>
-                      {`${meter.type} - ${meter.company} (${meter.isAvailable ? "Available" : "Unavailable"})`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedMeters[app._id] && (
-                <button
-                  className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                  onClick={() => handleStatusUpdate(app, 'connection_approved')}
-                  disabled={processing}
-                >
-                  {processing ? "Processing..." : "Confirm"}
-                </button>
-              )}
+        {selectedApp && (
+          <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Details for App ID: {selectedApp.appId}</h2>
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="text-sm text-red-600 underline"
+              >
+                Close
+              </button>
             </div>
-          ))}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+              <p><strong>Name:</strong> {selectedApp.consumerDetails?.name}</p>
+              <p><strong>Father's Name:</strong> {selectedApp.consumerDetails?.fatherName}</p>
+              <p><strong>Area:</strong> {selectedApp.addressDetails?.area}</p>
+              <p><strong>Village/Town:</strong> {selectedApp.addressDetails?.villageOrTown}</p>
+              <p><strong>Post Office:</strong> {selectedApp.addressDetails?.postOffice}</p>
+              <p><strong>Police Station:</strong> {selectedApp.addressDetails?.policeStation}</p>
+              <p><strong>District:</strong> {selectedApp.addressDetails?.district}</p>
+              <p><strong>PIN Code:</strong> {selectedApp.addressDetails?.pinCode}</p>
+              <p><strong>Mobile:</strong> {selectedApp.addressDetails?.mobileNumber}</p>
+            </div>
+
+            <label className="block text-sm font-medium mb-1">Select Meter Type:</label>
+              <select
+                value={selectedMeters[selectedApp.appId]?.type || ""}
+                onChange={(e) =>
+                  handleMeterFieldSelect(selectedApp.appId, "type", e.target.value)
+                }
+                className="border border-gray-300 rounded p-2 w-full md:w-2/3 mb-4"
+              >
+                <option value="">Select Type</option>
+                {[...new Set(meters.map(m => m.type))].map((type, i) => (
+                  <option key={i} value={type}>{type}</option>
+                ))}
+              </select>
+
+              <label className="block text-sm font-medium mb-1">Select Company:</label>
+              <select
+                value={selectedMeters[selectedApp.appId]?.company || ""}
+                onChange={(e) =>
+                  handleMeterFieldSelect(selectedApp.appId, "company", e.target.value)
+                }
+                className="border border-gray-300 rounded p-2 w-full md:w-2/3 mb-4"
+              >
+                <option value="">Select Company</option>
+                {[...new Set(meters.map(m => m.company))].map((company, i) => (
+                  <option key={i} value={company}>{company}</option>
+                ))}
+              </select>
+
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+              onClick={() => handleConnectionConfirm(selectedApp)}
+              disabled={processing || !selectedMeters[selectedApp.appId]}
+            >
+              {processing ? "Processing..." : "Confirm Connection"}
+            </button>
+          </div>
+        )}
         </main>
       </div>
   );

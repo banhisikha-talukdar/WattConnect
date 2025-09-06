@@ -16,11 +16,13 @@ exports.register = async (req, res) => {
       usageType,
       category,
       fmeId,
+      phone,
+      district,
     } = req.body;
 
     console.log("📝 Signup attempt for:", username);
 
-    if (!name || !username || !email || !password) {
+    if (!name || !username || !email || !password || !role) {
       return res.status(400).json({ message: "Please provide all required fields" });
     }
 
@@ -40,6 +42,10 @@ exports.register = async (req, res) => {
       }
     }
 
+    if (role === "engineer" && !fmeId) {
+      return res.status(400).json({ message: "FME ID is required for engineer role" });
+    }
+
     const existingUser = await User.findOne({
       $or: [{ email: email.toLowerCase() }, { username: username.trim() }],
     });
@@ -55,7 +61,7 @@ exports.register = async (req, res) => {
       username: username.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: role === "admin" ? "admin" : role,
+      role: role,
       isExistingCustomer,
       consumerNumber: isExistingCustomer ? consumerNumber : undefined,
       usageType: isExistingCustomer ? usageType : undefined,
@@ -63,20 +69,21 @@ exports.register = async (req, res) => {
       fmeId: role === "engineer" ? fmeId : undefined,
     });
 
-    if (user.role === "engineer") {
-      let fme = await FME.findOne({ email: user.email });
+    if (role === "engineer") {
+      let fme = await FME.findOne({ fmeId: fmeId });
 
       if (!fme) {
         fme = new FME({
-          name: user.name,
-          email: user.email,
+          name: name.trim(),
+          fmeId: fmeId.trim(),
+          phone: phone || "",
+          district: district || "",
         });
         await fme.save();
       }
 
-      user.fmeId = fme._id;
+      user.fmeId = fme.fmeId;
     }
-
 
     await user.save();
 
@@ -130,11 +137,18 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-      { userId: user._id, username: user.username, role: user.role },
-      process.env.JWT_SECRET || "fallbacksecret",
-      { expiresIn: "7d" }
-    );
+    const tokenPayload = {
+      userId: user._id,
+      username: user.username,
+      role: user.role,
+      fmeId: user.fmeId || null
+    };
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET || "fallbacksecret", {
+      expiresIn: "7d"
+    });
+
+    console.log('🎯 Token payload:', tokenPayload);
 
     res.json({
       message: "Login successful",
@@ -157,6 +171,8 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server error during login" });
   }
 };
+
+
 
 exports.getMe = async (req, res) => {
   try {

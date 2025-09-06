@@ -13,12 +13,6 @@ export default function Home() {
       action: () => navigate("/admin/applications"),
     },
     {
-      title: "Engineer Scheduling",
-      icon: "👷‍♂️",
-      description: "Manage requests for engineer visits from customers based on their preferred schedule.",
-      action: () => navigate("/admin/engineer-scheduling"),
-    },
-    {
       title: "Meter Scheduling",
       icon: "🔌",
       description: "Schedule and oversee meter installation visits requested by customers.",

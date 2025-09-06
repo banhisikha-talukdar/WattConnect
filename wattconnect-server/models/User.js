@@ -41,8 +41,33 @@ const userSchema = new mongoose.Schema({
   },
 
   fmeId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "FME",
+    type: String,
+    validate: {
+      validator: function (v) {
+        return this.role !== 'engineer' || !!v;
+      },
+      message: 'fmeId is required when role is engineer',
+    },
+  },
+
+  district: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        return this.role !== 'engineer' || !!v;
+      },
+      message: 'District is required when role is engineer',
+    },
+  },
+
+  phone: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        return this.role !== 'engineer' || !!v;
+      },
+      message: 'Phone is required when role is engineer',
+    },
   },
 });
 

@@ -44,7 +44,9 @@ const approveNewConnection = async (req, res) => {
       if (!exists) isUnique = true;
     }
 
-    const companyName = app?.consumerDetails?.meterCompany || "GENU";
+    console.log(app?.meterCompany);
+
+    const companyName = app?.meterCompany || "ABCD";
     const prefix = companyName.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4).padEnd(4, "X");
     const random6 = Math.floor(100000 + Math.random() * 900000);
     const meterNumber = `${prefix}${random6}`;
@@ -95,13 +97,13 @@ const assignFMEToApplication = async (req, res) => {
       return res.status(404).json({ message: "Application not found" });
     }
 
-    const fme = await FME.findById(fmeId);
+    const fme = await FME.findOne({ fmeId });
     if (!fme) {
       return res.status(404).json({ message: "FME not found" });
     }
 
-    app.assignedFME = fmeId;
-    app.status = "fme_assigned";
+    app.assignedFME = fme._id;
+    app.status = "pending_fme_action";
     await app.save();
 
     res.status(200).json({ message: "FME assigned successfully", app });

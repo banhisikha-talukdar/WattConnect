@@ -33,7 +33,6 @@ const upload = multer({
 
 router.post(
   "/",
-  verifyToken,
   upload.fields([
     { name: "passportPhoto" },
     { name: "identityProof" },
@@ -49,7 +48,7 @@ router.post(
 
 router.get("/all", verifyToken, getApplications);
 
-router.put("/:applicationId/status", verifyToken, updateApplicationStatus);
+router.put("/:applicationId/status", updateApplicationStatus);
 router.get("/track/:appId", getApplicationByAppId);
 
 module.exports = router;

@@ -46,37 +46,7 @@ export default function Applications() {
     }
   };
 
-  const handleStatusUpdate = async (application, newStatus) => {
-    setProcessing(true);
-    try {
-      await axios.put(
-        `http://localhost:5000/api/new-connection/${application.appId}/status`,
-        { status: newStatus },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setApplications(prev =>
-        prev.map(app =>
-          app._id === application._id ? { ...app, status: newStatus } : app
-        )
-      );
-
-      setSelectedApp(null);
-
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert(`Error: ${error.response?.data?.message || error.message}`);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const confirmAndForwardToFME = async () => {
+  const confirmAndForwardToFME = async (selectedApp) => {
     if (!selectedApp || !selectedFme) {
       alert("Application or FME not selected");
       return;
@@ -94,7 +64,7 @@ export default function Applications() {
           },
         }
       );
-      await handleStatusUpdate(selectedApp, 'pending_fme_action');
+      setSelectedApp(null);
       setShowFmeDialog(false);
       setSelectedFme(null);
     } catch (error) {
@@ -224,49 +194,53 @@ export default function Applications() {
 
             {/* FME Assignment Dialog */}
             {showFmeDialog && (
-              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-                <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300" onClick={(e) => e.stopPropagation()}>
+              <div className="fixed inset-0 z-[60] backdrop-blur-sm bg-white/30 flex justify-center items-center">
+                <div className="bg-white p-6 md:p-10 overflow-y-auto shadow-lg rounded-lg max-w-2xl w-full border border-gray-300 mx-4 max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
                   <h2 className="text-2xl font-bold mb-4">Assign FME</h2>
                   <div className="space-y-4 max-h-[400px] overflow-y-auto">
-                    {fmes.map((fme) => (
-                      <div
-                        key={fme._id}
-                        className={`p-4 border rounded cursor-pointer ${
-                          selectedFme && selectedFme._id === fme._id
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'hover:border-gray-400'
-                        }`}
-                        onClick={() => setSelectedFme(fme)}
-                      >
-                        <p className="font-semibold text-lg">{fme.name}</p>
-                        <p>Employee ID: {fme.employeeId}</p>
-                        <p>Contact: {fme.contactNumber}</p>
-                        <p>Email: {fme.email}</p>
+                    {fmes.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No FMEs available</p>
                       </div>
-                    ))}
+                    ) : ( 
+                  fmes.map((fme) => (
+                    <div
+                    key={fme._id}
+                      className={`p-4 border rounded cursor-pointer ${
+                        selectedFme && selectedFme._id === fme._id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'hover:border-gray-400'
+                      }`}
+                      onClick={() => setSelectedFme(fme)}
+                    >
+                      <p className="font-semibold text-lg">{fme.name}</p>
+                      <p className="text-gray-800">Employee ID: {fme.fmeId}</p>
+                      <p className="text-gray-800">Contact: {fme.phone}</p>
+                      <p className="text-gray-800">District: {fme.district}</p>
+                    </div>
+                  ))
+                    )}
                   </div>
-
+                    
                   <div className="flex justify-end gap-4 mt-6">
                     <button
                       className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
                       onClick={() => {
                         setShowFmeDialog(false);
                         setSelectedFme(null);
-                      }}
-                    >
+                      }}>
                       Cancel
                     </button>
                     <button
                       className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
                       disabled={!selectedFme || processing}
-                      onClick={confirmAndForwardToFME}
-                    >
-                      Forward to FME
+                      onClick={() => confirmAndForwardToFME(application)}>
+                        Forward to FME
                     </button>
                   </div>
                 </div>
               </div>
-            )}
+          )}
           </div>
         </div>
       </div>
@@ -287,9 +261,9 @@ export default function Applications() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category & Load</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -298,16 +272,20 @@ export default function Applications() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {applications.map(app => (
                   <tr key={app._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="text-sm font-bold text-gray-900">{app.appId}</div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <User className="h-5 w-5 text-gray-400 mr-3" />
                         <div>
                           <div className="text-sm font-medium text-gray-900">{app.consumerDetails.name}</div>
-                          <div className="text-sm text-gray-500">{app.userId?.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                         <div>
@@ -316,22 +294,18 @@ export default function Applications() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{app.appliedCategory}</div>
-                      <div className="text-sm text-gray-500">{app.appliedLoad} KW</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(app.status)}`}>
                         {app.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 text-gray-400 mr-2" />
                         <span className="text-sm text-gray-900">{formatDate(app.submittedAt)}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <button onClick={() => setSelectedApp(app)} className="text-blue-600 hover:text-blue-800 flex items-center">
                         <Eye className="h-4 w-4 mr-1" />
                         View Details

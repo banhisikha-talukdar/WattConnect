@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const newApplicationSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
 
   district: { type: String, required: true },
   subdivision: { type: String, required: true },
@@ -12,12 +12,14 @@ const newApplicationSchema = new mongoose.Schema({
   consumerNo: { type: String, unique: true },
 
   assignedFME: { type: mongoose.Schema.Types.ObjectId, ref: "FME", default: null },
-  fmeStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   fmeRemarks: String,
 
   meterType: {
     type: String,
     enum: ["single_phase", "three_phase", "lt_meter"]
+  },
+  meterCompany: {
+    type: String,
   },
   meterNumber: String,
   consumerNumber: String,
@@ -32,6 +34,11 @@ const newApplicationSchema = new mongoose.Schema({
       "connection_approved"
     ],
     default: "pending_admin_forward"
+  },
+
+  rejectionReason: {
+    type: String,
+    default: null
   },
 
   consumerDetails: {

@@ -9,9 +9,9 @@ const usageRoutes = require('./routes/usage');
 const newConnectionRoute = require("./routes/newConnection");
 const tariffRoutes = require("./routes/tariff");
 const scheduleRoutes = require('./routes/schedule');
-const fmeRoutes = require("./routes/fme");
 const chatbotRoute = require('./routes/chatbot');
 const adminRoutes = require('./routes/admin');
+const fmeRoutes = require('./routes/fme');
 
 dotenv.config();
 connectDB();
@@ -30,9 +30,9 @@ app.use('/api/usage', usageRoutes);
 app.use("/api/new-connection", newConnectionRoute);
 app.use("/api/tariffs", tariffRoutes);
 app.use('/api/schedule', scheduleRoutes);
-app.use("/api/fmes", fmeRoutes);
 app.use("/api/chatbot", chatbotRoute); 
 app.use("/api", adminRoutes);
+app.use("/api/fme", fmeRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -9,7 +9,7 @@ exports.verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    console.log("✅ Decoded JWT payload:", decoded);
     req.user = decoded;
 
     next();
